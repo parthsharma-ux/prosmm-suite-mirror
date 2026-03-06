@@ -45,8 +45,9 @@ export default function UserFunds() {
     supabase.from("payment_settings").select("*").then(({ data }) => {
       if (data) {
         for (const row of data) {
-          if (row.setting_key === "upi_qr_url") setUpiQrUrl(row.setting_value);
-          if (row.setting_key === "trc20_address") setTrc20Address(row.setting_value);
+          const details = row.details as Record<string, string> || {};
+          if (row.method === "upi") setUpiQrUrl(details.qr_url || "");
+          if (row.method === "usdt") setTrc20Address(details.address || "");
         }
       }
     });
@@ -64,7 +65,7 @@ export default function UserFunds() {
       screenshotUrl = path;
     }
     const { error } = await supabase.from("payment_requests").insert({
-      user_id: user.id, method: method as "upi" | "usdt", amount, reference: reference.trim(), screenshot_url: screenshotUrl,
+      user_id: user.id, method: method, amount, transaction_id: reference.trim(),
     });
     if (error) {
       if (error.message.includes("duplicate")) toast.error("This reference has already been submitted");
@@ -141,7 +142,7 @@ export default function UserFunds() {
               <TableRow key={p.id}>
                 <TableCell className="uppercase font-medium text-xs">{p.method}</TableCell>
                 <TableCell>${p.amount}</TableCell>
-                <TableCell className="font-mono text-xs max-w-32 truncate">{p.reference}</TableCell>
+                <TableCell className="font-mono text-xs max-w-32 truncate">{p.transaction_id || "—"}</TableCell>
                 <TableCell><Badge variant="outline" className={statusColors[p.status] || ""}>{p.status}</Badge></TableCell>
                 <TableCell className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</TableCell>
               </TableRow>

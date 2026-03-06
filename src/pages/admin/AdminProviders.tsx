@@ -19,10 +19,10 @@ export default function AdminProviders() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Provider | null>(null);
   const [syncing, setSyncing] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", api_url: "", api_key: "", currency: "USD", priority: 1 });
+  const [form, setForm] = useState({ name: "", api_url: "", api_key: "" });
 
   const fetchProviders = async () => {
-    const { data } = await supabase.from("providers").select("*").order("priority");
+    const { data } = await supabase.from("providers").select("*").order("name");
     setProviders(data || []);
     setLoading(false);
   };
@@ -31,13 +31,13 @@ export default function AdminProviders() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ name: "", api_url: "", api_key: "", currency: "USD", priority: 1 });
+    setForm({ name: "", api_url: "", api_key: "" });
     setDialogOpen(true);
   };
 
   const openEdit = (p: Provider) => {
     setEditing(p);
-    setForm({ name: p.name, api_url: p.api_url, api_key: p.api_key, currency: p.currency, priority: p.priority });
+    setForm({ name: p.name, api_url: p.api_url, api_key: p.api_key });
     setDialogOpen(true);
   };
 
@@ -53,7 +53,7 @@ export default function AdminProviders() {
   };
 
   const toggleStatus = async (p: Provider) => {
-    await supabase.from("providers").update({ status: !p.status }).eq("id", p.id);
+    await supabase.from("providers").update({ status: p.status === "active" ? "inactive" : "active" }).eq("id", p.id);
     fetchProviders();
   };
 
@@ -96,18 +96,16 @@ export default function AdminProviders() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead><TableHead>API URL</TableHead><TableHead>Currency</TableHead><TableHead>Priority</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead>
+              <TableHead>Name</TableHead><TableHead>API URL</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {providers.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No providers yet</TableCell></TableRow>}
+            {providers.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No providers yet</TableCell></TableRow>}
             {providers.map((p) => (
               <TableRow key={p.id}>
                 <TableCell className="font-medium">{p.name}</TableCell>
                 <TableCell className="text-muted-foreground text-xs max-w-48 truncate">{p.api_url}</TableCell>
-                <TableCell>{p.currency}</TableCell>
-                <TableCell>{p.priority}</TableCell>
-                <TableCell><Switch checked={p.status} onCheckedChange={() => toggleStatus(p)} /></TableCell>
+                <TableCell><Switch checked={p.status === "active"} onCheckedChange={() => toggleStatus(p)} /></TableCell>
                 <TableCell className="text-right space-x-1">
                   <Button variant="outline" size="sm" onClick={() => syncServices(p.id)} disabled={syncing === p.id}>
                     {syncing === p.id ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <RefreshCw className="h-4 w-4 mr-1" />}Sync
@@ -127,18 +125,6 @@ export default function AdminProviders() {
             <div className="space-y-2"><Label>Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. SMMPanel.co" /></div>
             <div className="space-y-2"><Label>API URL *</Label><Input value={form.api_url} onChange={(e) => setForm({ ...form, api_url: e.target.value })} placeholder="https://example.com/api/v2" /></div>
             <div className="space-y-2"><Label>API Key *</Label><Input value={form.api_key} onChange={(e) => setForm({ ...form, api_key: e.target.value })} type="password" placeholder="Your API key" /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Currency</Label>
-                <Select value={form.currency} onValueChange={(v) => setForm({ ...form, currency: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="USD">USD</SelectItem><SelectItem value="INR">INR</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2"><Label>Priority</Label><Input type="number" value={form.priority} onChange={(e) => setForm({ ...form, priority: Number(e.target.value) })} /></div>
-            </div>
             <Button onClick={handleSave} className="w-full">{editing ? "Update" : "Add"} Provider</Button>
           </div>
         </DialogContent>

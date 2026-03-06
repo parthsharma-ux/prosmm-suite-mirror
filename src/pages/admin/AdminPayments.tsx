@@ -32,7 +32,7 @@ export default function AdminPayments() {
     const { data: profile } = await supabase.from("profiles").select("wallet_balance").eq("user_id", p.user_id).single();
     if (profile) {
       await supabase.from("profiles").update({ wallet_balance: profile.wallet_balance + p.amount }).eq("user_id", p.user_id);
-      await supabase.from("transactions").insert({ user_id: p.user_id, type: "credit" as const, amount: p.amount, description: `Payment via ${p.method} - ${p.reference}` });
+      await supabase.from("transactions").insert({ user_id: p.user_id, type: "credit" as const, amount: p.amount, description: `Payment via ${p.method} - ${p.transaction_id || ''}` });
     }
     toast.success("Payment approved & wallet credited");
     fetchPayments();
@@ -41,7 +41,7 @@ export default function AdminPayments() {
   const reject = async (p: PaymentRequest) => {
     const reason = prompt("Rejection reason:");
     if (!reason) return;
-    await supabase.from("payment_requests").update({ status: "rejected" as const, reject_reason: reason }).eq("id", p.id);
+    await supabase.from("payment_requests").update({ status: "rejected" as const }).eq("id", p.id);
     toast.success("Payment rejected");
     fetchPayments();
   };
@@ -60,7 +60,7 @@ export default function AdminPayments() {
               <TableRow key={p.id}>
                 <TableCell className="uppercase font-medium text-xs">{p.method}</TableCell>
                 <TableCell>${p.amount}</TableCell>
-                <TableCell className="font-mono text-xs max-w-32 truncate">{p.reference}</TableCell>
+                <TableCell className="font-mono text-xs max-w-32 truncate">{p.transaction_id || "—"}</TableCell>
                 <TableCell><Badge variant="outline" className={statusColors[p.status] || ""}>{p.status}</Badge></TableCell>
                 <TableCell className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</TableCell>
                 <TableCell className="text-right space-x-1">

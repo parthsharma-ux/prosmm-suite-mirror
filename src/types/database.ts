@@ -19,63 +19,51 @@ export type Database = {
         Relationships: []
       }
       categories: {
-        Row: { created_at: string; id: string; name: string; status: boolean }
-        Insert: { created_at?: string; id?: string; name: string; status?: boolean }
-        Update: { created_at?: string; id?: string; name?: string; status?: boolean }
+        Row: { created_at: string; id: string; name: string; sort_order: number }
+        Insert: { created_at?: string; id?: string; name: string; sort_order?: number }
+        Update: { created_at?: string; id?: string; name?: string; sort_order?: number }
         Relationships: []
       }
       orders: {
-        Row: { charge: number; created_at: string; id: string; link: string; provider_id: string | null; provider_order_id: string | null; public_service_id: string | null; quantity: number; status: Database["public"]["Enums"]["order_status"]; user_id: string }
-        Insert: { charge?: number; created_at?: string; id?: string; link: string; provider_id?: string | null; provider_order_id?: string | null; public_service_id?: string | null; quantity: number; status?: Database["public"]["Enums"]["order_status"]; user_id: string }
-        Update: { charge?: number; created_at?: string; id?: string; link?: string; provider_id?: string | null; provider_order_id?: string | null; public_service_id?: string | null; quantity?: number; status?: Database["public"]["Enums"]["order_status"]; user_id?: string }
+        Row: { amount: number; created_at: string; id: string; link: string; provider_order_id: string | null; quantity: number; service_id: string | null; status: string; user_id: string }
+        Insert: { amount?: number; created_at?: string; id?: string; link: string; provider_order_id?: string | null; quantity: number; service_id?: string | null; status?: string; user_id: string }
+        Update: { amount?: number; created_at?: string; id?: string; link?: string; provider_order_id?: string | null; quantity?: number; service_id?: string | null; status?: string; user_id?: string }
         Relationships: []
       }
       payment_requests: {
-        Row: { amount: number; created_at: string; id: string; method: Database["public"]["Enums"]["payment_method"]; reference: string; reject_reason: string | null; screenshot_url: string | null; status: Database["public"]["Enums"]["payment_status"]; user_id: string }
-        Insert: { amount: number; created_at?: string; id?: string; method: Database["public"]["Enums"]["payment_method"]; reference: string; reject_reason?: string | null; screenshot_url?: string | null; status?: Database["public"]["Enums"]["payment_status"]; user_id: string }
-        Update: { amount?: number; created_at?: string; id?: string; method?: Database["public"]["Enums"]["payment_method"]; reference?: string; reject_reason?: string | null; screenshot_url?: string | null; status?: Database["public"]["Enums"]["payment_status"]; user_id?: string }
+        Row: { amount: number; created_at: string; id: string; method: string; status: string; transaction_id: string | null; user_id: string }
+        Insert: { amount: number; created_at?: string; id?: string; method: string; status?: string; transaction_id?: string | null; user_id: string }
+        Update: { amount?: number; created_at?: string; id?: string; method?: string; status?: string; transaction_id?: string | null; user_id?: string }
         Relationships: []
       }
       payment_settings: {
-        Row: { id: string; setting_key: string; setting_value: string; updated_at: string }
-        Insert: { id?: string; setting_key: string; setting_value?: string; updated_at?: string }
-        Update: { id?: string; setting_key?: string; setting_value?: string; updated_at?: string }
+        Row: { id: string; method: string; details: Json; enabled: boolean; updated_at: string }
+        Insert: { id?: string; method: string; details?: Json; enabled?: boolean; updated_at?: string }
+        Update: { id?: string; method?: string; details?: Json; enabled?: boolean; updated_at?: string }
         Relationships: []
       }
       profiles: {
-        Row: { created_at: string; email: string; id: string; name: string; status: Database["public"]["Enums"]["user_status"]; user_id: string; wallet_balance: number }
-        Insert: { created_at?: string; email: string; id?: string; name?: string; status?: Database["public"]["Enums"]["user_status"]; user_id: string; wallet_balance?: number }
-        Update: { created_at?: string; email?: string; id?: string; name?: string; status?: Database["public"]["Enums"]["user_status"]; user_id?: string; wallet_balance?: number }
-        Relationships: []
-      }
-      provider_services: {
-        Row: { created_at: string; description: string | null; external_service_id: string; id: string; max: number; min: number; name: string; provider_id: string; rate: number; status: boolean; type: string | null }
-        Insert: { created_at?: string; description?: string | null; external_service_id: string; id?: string; max?: number; min?: number; name: string; provider_id: string; rate?: number; status?: boolean; type?: string | null }
-        Update: { created_at?: string; description?: string | null; external_service_id?: string; id?: string; max?: number; min?: number; name?: string; provider_id?: string; rate?: number; status?: boolean; type?: string | null }
+        Row: { created_at: string; email: string; id: string; name: string | null; status: string; updated_at: string; user_id: string; wallet_balance: number }
+        Insert: { created_at?: string; email: string; id?: string; name?: string | null; status?: string; updated_at?: string; user_id: string; wallet_balance?: number }
+        Update: { created_at?: string; email?: string; id?: string; name?: string | null; status?: string; updated_at?: string; user_id?: string; wallet_balance?: number }
         Relationships: []
       }
       providers: {
-        Row: { api_key: string; api_url: string; created_at: string; currency: string; id: string; name: string; priority: number; status: boolean }
-        Insert: { api_key: string; api_url: string; created_at?: string; currency?: string; id?: string; name: string; priority?: number; status?: boolean }
-        Update: { api_key?: string; api_url?: string; created_at?: string; currency?: string; id?: string; name?: string; priority?: number; status?: boolean }
+        Row: { api_key: string; api_url: string; created_at: string; id: string; name: string; status: string }
+        Insert: { api_key: string; api_url: string; created_at?: string; id?: string; name: string; status?: string }
+        Update: { api_key?: string; api_url?: string; created_at?: string; id?: string; name?: string; status?: string }
         Relationships: []
       }
       public_services: {
-        Row: { category_id: string | null; created_at: string; description: string | null; id: string; max: number; min: number; name: string; retail_rate: number; status: boolean }
-        Insert: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max?: number; min?: number; name: string; retail_rate?: number; status?: boolean }
-        Update: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max?: number; min?: number; name?: string; retail_rate?: number; status?: boolean }
-        Relationships: []
-      }
-      service_provider_map: {
-        Row: { custom_margin: number | null; failover_enabled: boolean; id: string; priority: number; provider_service_id: string; public_service_id: string }
-        Insert: { custom_margin?: number | null; failover_enabled?: boolean; id?: string; priority?: number; provider_service_id: string; public_service_id: string }
-        Update: { custom_margin?: number | null; failover_enabled?: boolean; id?: string; priority?: number; provider_service_id?: string; public_service_id?: string }
+        Row: { category_id: string | null; created_at: string; description: string | null; id: string; max_quantity: number; min_quantity: number; name: string; rate: number; status: string; provider_id: string | null; provider_service_id: string | null }
+        Insert: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max_quantity?: number; min_quantity?: number; name: string; rate?: number; status?: string; provider_id?: string | null; provider_service_id?: string | null }
+        Update: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max_quantity?: number; min_quantity?: number; name?: string; rate?: number; status?: string; provider_id?: string | null; provider_service_id?: string | null }
         Relationships: []
       }
       transactions: {
-        Row: { amount: number; created_at: string; description: string | null; id: string; type: Database["public"]["Enums"]["transaction_type"]; user_id: string }
-        Insert: { amount: number; created_at?: string; description?: string | null; id?: string; type: Database["public"]["Enums"]["transaction_type"]; user_id: string }
-        Update: { amount?: number; created_at?: string; description?: string | null; id?: string; type?: Database["public"]["Enums"]["transaction_type"]; user_id?: string }
+        Row: { amount: number; created_at: string; description: string | null; id: string; type: string; user_id: string }
+        Insert: { amount: number; created_at?: string; description?: string | null; id?: string; type: string; user_id: string }
+        Update: { amount?: number; created_at?: string; description?: string | null; id?: string; type?: string; user_id?: string }
         Relationships: []
       }
       user_roles: {
