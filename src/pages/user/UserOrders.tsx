@@ -50,7 +50,7 @@ export default function UserOrders() {
                 <TableCell><Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary border-0 font-mono">{o.id.slice(0, 8)}</Badge></TableCell>
                 <TableCell className="max-w-40 truncate text-xs text-muted-foreground">{o.link}</TableCell>
                 <TableCell className="font-semibold">{o.quantity}</TableCell>
-                <TableCell className="font-bold">{format(o.charge)}</TableCell>
+                <TableCell className="font-bold">{format(o.amount)}</TableCell>
                 <TableCell><Badge variant="outline" className={`font-semibold capitalize ${statusColors[o.status] || ""}`}>{o.status}</Badge></TableCell>
                 <TableCell className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</TableCell>
               </TableRow>

@@ -41,7 +41,6 @@ export default function AdminCategories() {
     }
   };
 
-  const toggle = async (c: Category) => { await supabase.from("categories").update({ status: !c.status }).eq("id", c.id); fetchCategories(); };
   const del = async (id: string) => { if (!confirm("Delete?")) return; await supabase.from("categories").delete().eq("id", id); toast.success("Deleted"); fetchCategories(); };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
@@ -54,13 +53,13 @@ export default function AdminCategories() {
       </div>
       <div className="rounded-lg border bg-card overflow-hidden">
         <Table>
-          <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+          <TableHeader><TableRow><TableHead>Name</TableHead><TableHead>Sort Order</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
           <TableBody>
             {categories.length === 0 && <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-8">No categories</TableCell></TableRow>}
             {categories.map((c) => (
               <TableRow key={c.id}>
                 <TableCell className="font-medium">{c.name}</TableCell>
-                <TableCell><Switch checked={c.status} onCheckedChange={() => toggle(c)} /></TableCell>
+                <TableCell>{c.sort_order}</TableCell>
                 <TableCell className="text-right space-x-1">
                   <Button variant="ghost" size="icon" onClick={() => openEdit(c)}><Pencil className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" onClick={() => del(c.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>

@@ -30,14 +30,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [exchangeRate, setExchangeRate] = useState(83.5);
 
   useEffect(() => {
-    supabase
-      .from("payment_settings")
-      .select("setting_value")
-      .eq("setting_key", "usd_to_inr_rate")
-      .single()
-      .then(({ data }) => {
-        if (data) setExchangeRate(parseFloat(data.setting_value) || 83.5);
-      });
+    // Exchange rate could be stored in payment_settings but the schema changed.
+    // For now use default rate. Can be updated later.
   }, []);
 
   const setCurrency = (c: Currency) => {

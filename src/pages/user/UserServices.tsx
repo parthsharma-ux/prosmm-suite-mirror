@@ -30,8 +30,8 @@ export default function UserServices() {
   useEffect(() => {
     const fetchData = async () => {
       const [s, c] = await Promise.all([
-        supabase.from("public_services").select("*").eq("status", true).order("name"),
-        supabase.from("categories").select("*").eq("status", true).order("name"),
+        supabase.from("public_services").select("*").eq("status", "active").order("name"),
+        supabase.from("categories").select("*").order("name"),
       ]);
       setServices(s.data || []);
       setCategories(c.data || []);
@@ -42,12 +42,12 @@ export default function UserServices() {
 
   const filteredServices = selectedCategory ? services.filter((s) => s.category_id === selectedCategory) : services;
   const service = services.find((s) => s.id === selectedService);
-  const totalCharge = service ? (service.retail_rate / 1000) * quantity : 0;
+  const totalCharge = service ? (service.rate / 1000) * quantity : 0;
 
   const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !service) return;
-    if (quantity < service.min || quantity > service.max) { toast.error(`Quantity must be between ${service.min} and ${service.max}`); return; }
+    if (quantity < service.min_quantity || quantity > service.max_quantity) { toast.error(`Quantity must be between ${service.min_quantity} and ${service.max_quantity}`); return; }
     if (!link.trim()) { toast.error("Link is required"); return; }
     setSubmitting(true);
     try {
@@ -96,7 +96,7 @@ export default function UserServices() {
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Service</Label>
-              <Select value={selectedService || "__none__"} onValueChange={(v) => { const id = v === "__none__" ? "" : v; setSelectedService(id); const s = services.find((x) => x.id === id); if (s) setQuantity(s.min); }}>
+              <Select value={selectedService || "__none__"} onValueChange={(v) => { const id = v === "__none__" ? "" : v; setSelectedService(id); const s = services.find((x) => x.id === id); if (s) setQuantity(s.min_quantity); }}>
                 <SelectTrigger className="w-full h-11 max-w-full"><SelectValue placeholder="Select a service" /></SelectTrigger>
                 <SelectContent className="max-h-72 overflow-x-hidden" style={{ width: 'var(--radix-select-trigger-width)', maxWidth: 'calc(100vw - 2rem)' }}>
                   <SelectItem value="__none__">Select a service</SelectItem>
@@ -108,8 +108,8 @@ export default function UserServices() {
                           <span className="font-semibold text-[13px] leading-snug" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>{s.name}</span>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground pl-0">
-                          <span className="font-semibold text-foreground">{format(s.retail_rate, 2)}/1K</span>
-                          <span className="text-muted-foreground/50">•</span><span>Min: {s.min}</span><span className="text-muted-foreground/50">•</span><span>Max: {s.max}</span>
+                          <span className="font-semibold text-foreground">{format(s.rate, 2)}/1K</span>
+                          <span className="text-muted-foreground/50">•</span><span>Min: {s.min_quantity}</span><span className="text-muted-foreground/50">•</span><span>Max: {s.max_quantity}</span>
                         </div>
                       </div>
                     </SelectItem>
@@ -128,8 +128,8 @@ export default function UserServices() {
                 </div>
                 {service.description && <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap break-words" style={{ overflowWrap: "anywhere" }}>{service.description}</p>}
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="font-semibold text-foreground">{format(service.retail_rate, 2)}/1K</span>
-                  <span>Min: {service.min}</span><span>Max: {service.max}</span>
+                   <span className="font-semibold text-foreground">{format(service.rate, 2)}/1K</span>
+                   <span>Min: {service.min_quantity}</span><span>Max: {service.max_quantity}</span>
                 </div>
               </div>
             )}
@@ -140,7 +140,7 @@ export default function UserServices() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 min-w-0">
                 <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Hash className="h-3 w-3" /> Quantity</Label>
-                <Input type="number" value={quantity || ""} onChange={(e) => setQuantity(Number(e.target.value))} min={service?.min || 1} max={service?.max || 10000} required placeholder={service ? `${service.min} – ${service.max}` : ""} className="w-full h-11" />
+                <Input type="number" value={quantity || ""} onChange={(e) => setQuantity(Number(e.target.value))} min={service?.min_quantity || 1} max={service?.max_quantity || 10000} required placeholder={service ? `${service.min_quantity} – ${service.max_quantity}` : ""} className="w-full h-11" />
               </div>
               <div className="space-y-2 min-w-0">
                 <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Charge</Label>
@@ -150,7 +150,7 @@ export default function UserServices() {
             {service && (
               <div className="flex items-center justify-between rounded-lg bg-primary/5 border border-primary/10 px-4 py-2.5 text-xs animate-in fade-in duration-200">
                 <span className="text-muted-foreground font-medium flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary" /> Rate per 1K</span>
-                <span className="font-bold text-foreground">{format(service.retail_rate)}</span>
+                <span className="font-bold text-foreground">{format(service.rate)}</span>
               </div>
             )}
             <Button type="submit" className="w-full h-11 font-semibold text-sm" disabled={submitting || !selectedService}>

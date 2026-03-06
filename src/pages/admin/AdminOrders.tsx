@@ -38,8 +38,8 @@ export default function AdminOrders() {
     await supabase.from("orders").update({ status: "cancelled" }).eq("id", order.id);
     const { data: profile } = await supabase.from("profiles").select("wallet_balance").eq("user_id", order.user_id).single();
     if (profile) {
-      await supabase.from("profiles").update({ wallet_balance: profile.wallet_balance + order.charge }).eq("user_id", order.user_id);
-      await supabase.from("transactions").insert({ user_id: order.user_id, type: "refund" as const, amount: order.charge, description: `Refund for order ${order.id.slice(0, 8)}` });
+      await supabase.from("profiles").update({ wallet_balance: profile.wallet_balance + order.amount }).eq("user_id", order.user_id);
+      await supabase.from("transactions").insert({ user_id: order.user_id, type: "refund" as const, amount: order.amount, description: `Refund for order ${order.id.slice(0, 8)}` });
     }
     toast.success("Order refunded");
     fetchOrders();
@@ -68,7 +68,7 @@ export default function AdminOrders() {
                 <TableCell className="font-mono text-xs">{o.id.slice(0, 8)}</TableCell>
                 <TableCell className="max-w-32 truncate text-xs">{o.link}</TableCell>
                 <TableCell>{o.quantity}</TableCell>
-                <TableCell>${o.charge}</TableCell>
+                <TableCell>${o.amount}</TableCell>
                 <TableCell><Badge variant="outline" className={statusColors[o.status] || ""}>{o.status}</Badge></TableCell>
                 <TableCell className="text-right">
                   {(o.status === "failed" || o.status === "pending") && <Button variant="outline" size="sm" onClick={() => refundOrder(o)}>Refund</Button>}

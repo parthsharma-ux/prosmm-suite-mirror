@@ -14,14 +14,14 @@ export default function AdminDashboard() {
     const fetchStats = async () => {
       const [users, orders, services, providers, payments, failedOrders] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("orders").select("id, charge"),
-        supabase.from("public_services").select("id", { count: "exact", head: true }).eq("status", true),
-        supabase.from("providers").select("id", { count: "exact", head: true }).eq("status", true),
+        supabase.from("orders").select("id, amount"),
+        supabase.from("public_services").select("id", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("providers").select("id", { count: "exact", head: true }).eq("status", "active"),
         supabase.from("payment_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "failed"),
       ]);
       const orderData = orders.data || [];
-      const totalRevenue = orderData.reduce((sum, o) => sum + (o.charge || 0), 0);
+      const totalRevenue = orderData.reduce((sum, o) => sum + (o.amount || 0), 0);
       setStats({
         totalUsers: users.count || 0, totalOrders: orderData.length, totalRevenue,
         activeServices: services.count || 0, activeProviders: providers.count || 0,
