@@ -148,17 +148,17 @@ export default function UserServices() {
             </div>
 
             {service && (
-              <div className="rounded-xl border border-border/50 bg-muted/30 p-4 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                <div className="flex items-start gap-2 min-w-0">
+              <div className="rounded-xl border border-border/50 bg-muted/30 p-4 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200 w-full box-border overflow-hidden">
+                <div className="flex items-start gap-2 min-w-0 w-full">
                   <Badge variant="secondary" className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary border-0 mt-0.5">
-                    #{service.provider_service_id || service.id.slice(0, 6)}
+                    ID: {service.provider_service_id || "N/A"}
                   </Badge>
-                  <div className="min-w-0">
-                    <p className="font-bold text-sm text-foreground whitespace-normal break-words">{service.name}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-sm text-foreground leading-[1.4]" style={{ wordBreak: "break-word", overflowWrap: "anywhere", whiteSpace: "normal" }}>{service.name}</p>
                     {getCategoryName(service.category_id) && <p className="text-[11px] text-muted-foreground mt-0.5">{getCategoryName(service.category_id)}</p>}
                   </div>
                 </div>
-                {service.description && <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap break-words" style={{ overflowWrap: "anywhere" }}>{service.description}</p>}
+                {service.description && <p className="text-[13px] text-muted-foreground leading-[1.4] whitespace-pre-wrap" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{service.description}</p>}
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                    <span className="font-semibold text-foreground">{format(service.rate, 2)}/1K</span>
                    <span>Min: {service.min_quantity}</span><span>Max: {service.max_quantity}</span>
