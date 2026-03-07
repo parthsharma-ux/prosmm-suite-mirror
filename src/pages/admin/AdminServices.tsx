@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import type { Tables } from "@/types/database";
 
 type Service = Tables<"public_services">;
@@ -23,6 +23,7 @@ export default function AdminServices() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
   const [form, setForm] = useState({ category_id: "", name: "", description: "", rate: 0, min_quantity: 1, max_quantity: 10000 });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
     const [s, c] = await Promise.all([
@@ -55,6 +56,14 @@ export default function AdminServices() {
   const del = async (id: string) => { if (!confirm("Delete?")) return; await supabase.from("public_services").delete().eq("id", id); toast.success("Deleted"); fetchData(); };
   const getCategoryName = (id: string | null) => categories.find((c) => c.id === id)?.name || "—";
 
+  const filteredServices = services.filter((s) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return s.name.toLowerCase().includes(q) ||
+      (s.provider_service_id && s.provider_service_id.includes(searchQuery)) ||
+      s.id.includes(searchQuery);
+  });
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
 
   return (
@@ -63,19 +72,38 @@ export default function AdminServices() {
         <h2 className="text-xl font-bold tracking-tight">Public Services</h2>
         <Button size="sm" onClick={openAdd}><Plus className="h-4 w-4 mr-1" /> Add Service</Button>
       </div>
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name or service ID..." className="pl-9" />
+      </div>
       <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/30">
-              <TableHead className="font-semibold">ID</TableHead><TableHead className="font-semibold">Name</TableHead><TableHead className="font-semibold">Category</TableHead><TableHead className="font-semibold">Rate</TableHead><TableHead className="font-semibold">Min/Max</TableHead><TableHead className="font-semibold">Status</TableHead><TableHead className="text-right font-semibold">Actions</TableHead>
+              <TableHead className="font-semibold">Service ID</TableHead>
+              <TableHead className="font-semibold">Name</TableHead>
+              <TableHead className="font-semibold">Category</TableHead>
+              <TableHead className="font-semibold">Rate</TableHead>
+              <TableHead className="font-semibold">Min/Max</TableHead>
+              <TableHead className="font-semibold">Status</TableHead>
+              <TableHead className="text-right font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {services.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No services</TableCell></TableRow>}
-            {services.map((s) => (
+            {filteredServices.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No services</TableCell></TableRow>}
+            {filteredServices.map((s) => (
               <TableRow key={s.id} className="group hover:bg-muted/20 transition-colors">
-                <TableCell><Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0 rounded bg-primary/10 text-primary border-0">{s.id.slice(0, 6)}</Badge></TableCell>
-                <TableCell><div className="min-w-0 max-w-64"><p className="font-bold text-sm whitespace-normal break-words leading-tight">{s.name}</p>{s.description && <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{s.description}</p>}</div></TableCell>
+                <TableCell>
+                  <Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0 rounded bg-primary/10 text-primary border-0">
+                    #{s.provider_service_id || s.id.slice(0, 6)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="min-w-0 max-w-64">
+                    <p className="font-bold text-sm whitespace-normal break-words leading-tight">{s.name}</p>
+                    {s.description && <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{s.description}</p>}
+                  </div>
+                </TableCell>
                 <TableCell><span className="font-medium text-xs">{getCategoryName(s.category_id)}</span></TableCell>
                 <TableCell><span className="font-semibold">${s.rate}</span></TableCell>
                 <TableCell className="text-xs text-muted-foreground">{s.min_quantity} / {s.max_quantity}</TableCell>

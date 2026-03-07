@@ -1,1 +1,7 @@
 project_id = "nazazuoalftszilckyym"
+
+[functions.sync-provider-services]
+verify_jwt = false
+
+[functions.place-order]
+verify_jwt = false
