@@ -114,28 +114,28 @@ export default function UserServices() {
                 />
               </div>
               <Select value={selectedService || "__none__"} onValueChange={(v) => { const id = v === "__none__" ? "" : v; setSelectedService(id); const s = services.find((x) => x.id === id); if (s) setQuantity(s.min_quantity); }}>
-                <SelectTrigger className="w-full h-11">
+                <SelectTrigger className="w-full h-11 overflow-hidden">
                   <SelectValue placeholder="Select a service">
                     {service && (
-                      <span className="truncate block text-left">
-                        {service.provider_service_id && <span className="text-primary font-bold mr-1">#{service.provider_service_id}</span>}
-                        {service.name}
+                      <span className="truncate block text-left max-w-full">
+                        <span className="text-primary font-bold mr-1">ID: {service.provider_service_id || "N/A"}</span>
+                        <span className="truncate">{service.name}</span>
                       </span>
                     )}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="max-h-72" style={{ width: 'var(--radix-select-trigger-width)', maxWidth: 'calc(100vw - 2rem)' }}>
+                <SelectContent className="max-h-72 overflow-x-hidden" style={{ width: 'var(--radix-select-trigger-width)', maxWidth: 'calc(100vw - 2rem)' }}>
                   <SelectItem value="__none__">Select a service</SelectItem>
                   {filteredServices.map((s) => (
-                    <SelectItem key={s.id} value={s.id} className="py-2 px-2">
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <span className="shrink-0 text-[11px] font-bold text-primary">
-                            #{s.provider_service_id || s.id.slice(0, 6)}
+                    <SelectItem key={s.id} value={s.id} className="py-2.5 px-2">
+                      <div className="w-full box-border overflow-hidden">
+                        <div className="flex items-start gap-1.5 min-w-0">
+                          <span className="shrink-0 text-xs font-bold text-primary">
+                            ID: {s.provider_service_id || "N/A"}
                           </span>
-                          <span className="text-sm font-medium truncate">{s.name}</span>
+                          <span className="text-sm font-semibold break-words" style={{ overflowWrap: "anywhere", whiteSpace: "normal", lineHeight: "1.4" }}>{s.name}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-1">
                           <span className="font-semibold text-foreground">{format(s.rate, 2)}/1K</span>
                           <span>Min: {s.min_quantity}</span>
                           <span>Max: {s.max_quantity}</span>
