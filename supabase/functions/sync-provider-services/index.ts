@@ -23,7 +23,6 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Verify user is admin
     const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -37,7 +36,6 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check admin role
     const { data: roleData } = await adminClient
       .from("user_roles")
       .select("role")
@@ -60,7 +58,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get provider
     const { data: provider, error: provError } = await adminClient
       .from("providers")
       .select("*")
@@ -74,15 +71,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch services from provider API
-    const apiUrl = provider.api_url;
-    const apiKey = provider.api_key;
-
+    // Fetch services from provider API - only return them, don't insert
     const formData = new URLSearchParams();
-    formData.append("key", apiKey);
+    formData.append("key", provider.api_key);
     formData.append("action", "services");
 
-    const apiRes = await fetch(apiUrl, {
+    const apiRes = await fetch(provider.api_url, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: formData.toString(),
@@ -104,84 +98,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get existing services for this provider
-    const { data: existingServices } = await adminClient
-      .from("public_services")
-      .select("id, provider_service_id")
-      .eq("provider_id", provider_id);
-
-    const existingMap = new Map(
-      (existingServices || []).map((s) => [s.provider_service_id, s.id])
-    );
-
-    let synced = 0;
-    let updated = 0;
-
-    // Get or create categories
-    const categoryMap = new Map<string, string>();
-    const { data: existingCategories } = await adminClient
-      .from("categories")
-      .select("id, name");
-    for (const cat of existingCategories || []) {
-      categoryMap.set(cat.name.toLowerCase(), cat.id);
-    }
-
-    for (const svc of providerServices) {
-      const serviceId = String(svc.service);
-      const name = svc.name || `Service ${serviceId}`;
-      const rate = parseFloat(svc.rate) || 0;
-      const minQty = parseInt(svc.min) || 1;
-      const maxQty = parseInt(svc.max) || 10000;
-      const categoryName = svc.category || "Uncategorized";
-      const description = svc.description || null;
-
-      // Get or create category
-      let categoryId = categoryMap.get(categoryName.toLowerCase());
-      if (!categoryId) {
-        const { data: newCat } = await adminClient
-          .from("categories")
-          .insert({ name: categoryName })
-          .select("id")
-          .single();
-        if (newCat) {
-          categoryId = newCat.id;
-          categoryMap.set(categoryName.toLowerCase(), categoryId);
-        }
-      }
-
-      if (existingMap.has(serviceId)) {
-        // Update existing
-        await adminClient
-          .from("public_services")
-          .update({
-            name,
-            rate,
-            min_quantity: minQty,
-            max_quantity: maxQty,
-            category_id: categoryId || null,
-            description,
-          })
-          .eq("id", existingMap.get(serviceId)!);
-        updated++;
-      } else {
-        // Insert new
-        await adminClient.from("public_services").insert({
-          name,
-          rate,
-          min_quantity: minQty,
-          max_quantity: maxQty,
-          provider_id,
-          provider_service_id: serviceId,
-          category_id: categoryId || null,
-          status: "active",
-          description,
-        });
-        synced++;
-      }
-    }
+    // Return provider services list for mapping - no DB inserts
+    const services = providerServices.map((svc: any) => ({
+      service_id: String(svc.service),
+      name: svc.name || `Service ${svc.service}`,
+      rate: parseFloat(svc.rate) || 0,
+      min: parseInt(svc.min) || 1,
+      max: parseInt(svc.max) || 10000,
+      category: svc.category || "Uncategorized",
+      description: svc.description || null,
+    }));
 
     return new Response(
-      JSON.stringify({ synced, updated, total: providerServices.length }),
+      JSON.stringify({ services, total: services.length }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
