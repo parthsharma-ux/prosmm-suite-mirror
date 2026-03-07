@@ -15,34 +15,47 @@ import type { Tables } from "@/types/database";
 
 type Service = Tables<"public_services">;
 type Category = Tables<"categories">;
+type Provider = Tables<"providers">;
 
 export default function AdminServices() {
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
-  const [form, setForm] = useState({ category_id: "", name: "", description: "", rate: 0, min_quantity: 1, max_quantity: 10000 });
+  const [form, setForm] = useState({ category_id: "", name: "", description: "", rate: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" });
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
-    const [s, c] = await Promise.all([
+    const [s, c, p] = await Promise.all([
       supabase.from("public_services").select("*").order("name"),
       supabase.from("categories").select("*").order("name"),
+      supabase.from("providers").select("*").eq("status", "active").order("name"),
     ]);
     setServices(s.data || []);
     setCategories(c.data || []);
+    setProviders(p.data || []);
     setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
 
-  const openAdd = () => { setEditing(null); setForm({ category_id: "", name: "", description: "", rate: 0, min_quantity: 1, max_quantity: 10000 }); setDialogOpen(true); };
-  const openEdit = (s: Service) => { setEditing(s); setForm({ category_id: s.category_id || "", name: s.name, description: s.description || "", rate: Number(s.rate), min_quantity: s.min_quantity, max_quantity: s.max_quantity }); setDialogOpen(true); };
+  const openAdd = () => { setEditing(null); setForm({ category_id: "", name: "", description: "", rate: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" }); setDialogOpen(true); };
+  const openEdit = (s: Service) => { setEditing(s); setForm({ category_id: s.category_id || "", name: s.name, description: s.description || "", rate: Number(s.rate), min_quantity: s.min_quantity, max_quantity: s.max_quantity, provider_id: s.provider_id || "", provider_service_id: s.provider_service_id || "" }); setDialogOpen(true); };
 
   const handleSave = async () => {
     if (!form.name) { toast.error("Name required"); return; }
-    const payload = { ...form, category_id: form.category_id || null, rate: Number(form.rate), min_quantity: Number(form.min_quantity), max_quantity: Number(form.max_quantity) };
+    const payload = {
+      category_id: form.category_id || null,
+      name: form.name,
+      description: form.description || null,
+      rate: Number(form.rate),
+      min_quantity: Number(form.min_quantity),
+      max_quantity: Number(form.max_quantity),
+      provider_id: form.provider_id || null,
+      provider_service_id: form.provider_service_id || null,
+    };
     if (editing) {
       const { error } = await supabase.from("public_services").update(payload).eq("id", editing.id);
       if (error) toast.error(error.message); else { toast.success("Updated"); setDialogOpen(false); fetchData(); }
@@ -55,13 +68,13 @@ export default function AdminServices() {
   const toggle = async (s: Service) => { await supabase.from("public_services").update({ status: s.status === "active" ? "inactive" : "active" }).eq("id", s.id); fetchData(); };
   const del = async (id: string) => { if (!confirm("Delete?")) return; await supabase.from("public_services").delete().eq("id", id); toast.success("Deleted"); fetchData(); };
   const getCategoryName = (id: string | null) => categories.find((c) => c.id === id)?.name || "—";
+  const getProviderName = (id: string | null) => providers.find((p) => p.id === id)?.name || "";
 
   const filteredServices = services.filter((s) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return s.name.toLowerCase().includes(q) ||
-      (s.provider_service_id && s.provider_service_id.includes(searchQuery)) ||
-      s.id.includes(searchQuery);
+      (s.provider_service_id && s.provider_service_id.includes(searchQuery));
   });
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
@@ -83,6 +96,7 @@ export default function AdminServices() {
               <TableHead className="font-semibold">Service ID</TableHead>
               <TableHead className="font-semibold">Name</TableHead>
               <TableHead className="font-semibold">Category</TableHead>
+              <TableHead className="font-semibold">Provider</TableHead>
               <TableHead className="font-semibold">Rate</TableHead>
               <TableHead className="font-semibold">Min/Max</TableHead>
               <TableHead className="font-semibold">Status</TableHead>
@@ -90,12 +104,12 @@ export default function AdminServices() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredServices.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No services</TableCell></TableRow>}
+            {filteredServices.length === 0 && <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No services</TableCell></TableRow>}
             {filteredServices.map((s) => (
               <TableRow key={s.id} className="group hover:bg-muted/20 transition-colors">
                 <TableCell>
                   <Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0 rounded bg-primary/10 text-primary border-0">
-                    #{s.provider_service_id || s.id.slice(0, 6)}
+                    {s.provider_service_id ? `#${s.provider_service_id}` : "—"}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -105,6 +119,7 @@ export default function AdminServices() {
                   </div>
                 </TableCell>
                 <TableCell><span className="font-medium text-xs">{getCategoryName(s.category_id)}</span></TableCell>
+                <TableCell><span className="text-xs text-muted-foreground">{getProviderName(s.provider_id) || "—"}</span></TableCell>
                 <TableCell><span className="font-semibold">${s.rate}</span></TableCell>
                 <TableCell className="text-xs text-muted-foreground">{s.min_quantity} / {s.max_quantity}</TableCell>
                 <TableCell><Switch checked={s.status === "active"} onCheckedChange={() => toggle(s)} /></TableCell>
@@ -134,6 +149,25 @@ export default function AdminServices() {
               <div className="space-y-2"><Label className="font-semibold text-xs uppercase tracking-wider">Rate ($)</Label><Input type="number" step="0.01" value={form.rate} onChange={(e) => setForm({ ...form, rate: Number(e.target.value) })} /></div>
               <div className="space-y-2"><Label className="font-semibold text-xs uppercase tracking-wider">Min</Label><Input type="number" value={form.min_quantity} onChange={(e) => setForm({ ...form, min_quantity: Number(e.target.value) })} /></div>
               <div className="space-y-2"><Label className="font-semibold text-xs uppercase tracking-wider">Max</Label><Input type="number" value={form.max_quantity} onChange={(e) => setForm({ ...form, max_quantity: Number(e.target.value) })} /></div>
+            </div>
+            <div className="border-t border-border/50 pt-4 space-y-4">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Provider Mapping (for auto order forwarding)</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="font-semibold text-xs uppercase tracking-wider">Provider</Label>
+                  <Select value={form.provider_id} onValueChange={(v) => setForm({ ...form, provider_id: v === "__none__" ? "" : v })}>
+                    <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">None</SelectItem>
+                      {providers.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-semibold text-xs uppercase tracking-wider">Provider Service ID</Label>
+                  <Input value={form.provider_service_id} onChange={(e) => setForm({ ...form, provider_service_id: e.target.value })} placeholder="e.g. 8221" />
+                </div>
+              </div>
             </div>
             <Button onClick={handleSave} className="w-full font-semibold">{editing ? "Update" : "Create"}</Button>
           </div>
