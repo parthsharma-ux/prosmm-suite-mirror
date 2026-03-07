@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShoppingCart, Link as LinkIcon, Hash, Zap } from "lucide-react";
+import { ShoppingCart, Link as LinkIcon, Hash, Zap, Search } from "lucide-react";
 import type { Tables } from "@/types/database";
 
 type PublicService = Tables<"public_services">;
@@ -26,6 +26,7 @@ export default function UserServices() {
   const [link, setLink] = useState("");
   const [quantity, setQuantity] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,7 +41,13 @@ export default function UserServices() {
     fetchData();
   }, []);
 
-  const filteredServices = selectedCategory ? services.filter((s) => s.category_id === selectedCategory) : services;
+  const filteredServices = services.filter((s) => {
+    const matchesCategory = !selectedCategory || s.category_id === selectedCategory;
+    const matchesSearch = !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (s.provider_service_id && s.provider_service_id.includes(searchQuery));
+    return matchesCategory && matchesSearch;
+  });
+
   const service = services.find((s) => s.id === selectedService);
   const totalCharge = service ? (service.rate / 1000) * quantity : 0;
 
@@ -63,7 +70,7 @@ export default function UserServices() {
       if (!res.ok) toast.error(data.error || "Failed to place order");
       else {
         toast.success(data.provider_order_id ? `Order placed & sent to provider! ID: ${data.provider_order_id}` : "Order placed successfully!");
-        setLink(""); setQuantity(0); setSelectedService(""); setSelectedCategory("");
+        setLink(""); setQuantity(0); setSelectedService(""); setSelectedCategory(""); setSearchQuery("");
       }
     } catch { toast.error("Network error"); }
     setSubmitting(false);
@@ -94,22 +101,44 @@ export default function UserServices() {
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Service</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name or service ID..."
+                  className="pl-9 h-11 mb-2"
+                />
+              </div>
               <Select value={selectedService || "__none__"} onValueChange={(v) => { const id = v === "__none__" ? "" : v; setSelectedService(id); const s = services.find((x) => x.id === id); if (s) setQuantity(s.min_quantity); }}>
-                <SelectTrigger className="w-full h-11 max-w-full"><SelectValue placeholder="Select a service" /></SelectTrigger>
-                <SelectContent className="max-h-72 overflow-x-hidden" style={{ width: 'var(--radix-select-trigger-width)', maxWidth: 'calc(100vw - 2rem)' }}>
+                <SelectTrigger className="w-full h-11">
+                  <SelectValue placeholder="Select a service">
+                    {service && (
+                      <span className="truncate block text-left">
+                        {service.provider_service_id && <span className="text-primary font-bold mr-1">#{service.provider_service_id}</span>}
+                        {service.name}
+                      </span>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="max-h-72" style={{ width: 'var(--radix-select-trigger-width)', maxWidth: 'calc(100vw - 2rem)' }}>
                   <SelectItem value="__none__">Select a service</SelectItem>
                   {filteredServices.map((s) => (
-                    <SelectItem key={s.id} value={s.id} className="py-2.5 px-2">
-                      <div className="flex flex-col gap-1 w-full min-w-0 overflow-hidden" style={{ maxWidth: '100%' }}>
-                        <div className="flex items-start gap-2 min-w-0">
-                          <span className="shrink-0 inline-block text-[11px] font-bold px-2 py-0.5 rounded-md bg-primary/15 text-primary leading-none mt-0.5">ID: {s.id.slice(0, 4)}</span>
-                          <span className="font-semibold text-[13px] leading-snug" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal' }}>{s.name}</span>
+                    <SelectItem key={s.id} value={s.id} className="py-2 px-2">
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="shrink-0 text-[11px] font-bold text-primary">
+                            #{s.provider_service_id || s.id.slice(0, 6)}
+                          </span>
+                          <span className="text-sm font-medium truncate">{s.name}</span>
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground pl-0">
+                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                           <span className="font-semibold text-foreground">{format(s.rate, 2)}/1K</span>
-                          <span className="text-muted-foreground/50">•</span><span>Min: {s.min_quantity}</span><span className="text-muted-foreground/50">•</span><span>Max: {s.max_quantity}</span>
+                          <span>Min: {s.min_quantity}</span>
+                          <span>Max: {s.max_quantity}</span>
                         </div>
                       </div>
                     </SelectItem>
@@ -117,10 +146,13 @@ export default function UserServices() {
                 </SelectContent>
               </Select>
             </div>
+
             {service && (
               <div className="rounded-xl border border-border/50 bg-muted/30 p-4 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
                 <div className="flex items-start gap-2 min-w-0">
-                  <Badge variant="secondary" className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary border-0 mt-0.5">ID: {service.id.slice(0, 4)}</Badge>
+                  <Badge variant="secondary" className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary border-0 mt-0.5">
+                    #{service.provider_service_id || service.id.slice(0, 6)}
+                  </Badge>
                   <div className="min-w-0">
                     <p className="font-bold text-sm text-foreground whitespace-normal break-words">{service.name}</p>
                     {getCategoryName(service.category_id) && <p className="text-[11px] text-muted-foreground mt-0.5">{getCategoryName(service.category_id)}</p>}
@@ -133,6 +165,7 @@ export default function UserServices() {
                 </div>
               </div>
             )}
+
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><LinkIcon className="h-3 w-3" /> Link</Label>
               <Input type="url" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://example.com/post" required className="w-full h-11" />
