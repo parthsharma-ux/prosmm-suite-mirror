@@ -85,9 +85,9 @@ export default function UserLayout() {
             </SheetContent>
           </Sheet>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <img src={logo} alt="7smmpanel" className="h-7" />
-            <span className="text-sm font-bold tracking-wide text-foreground">7smmpanel</span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <img src={logo} alt="7smmpanel" className="h-6 md:h-7" />
+            <span className="text-xs md:text-sm font-bold tracking-wide text-foreground whitespace-nowrap">7smmpanel</span>
           </div>
 
           <nav className="hidden md:flex items-center gap-1">
