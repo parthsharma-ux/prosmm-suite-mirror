@@ -40,10 +40,9 @@ export default function UserDashboard() {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <h2 className="text-xl font-bold tracking-tight">Dashboard</h2>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatCard title="Wallet Balance" value={format(walletUsd)} icon={Wallet} />
         <StatCard title="Balance (INR)" value={`₹${walletInr.toFixed(2)}`} icon={IndianRupee} />
-        <StatCard title="Market Rate" value={`₹${marketRate} / USDT`} icon={TrendingUp} />
         <StatCard title="Total Orders" value={stats.total} icon={ShoppingCart} />
         <StatCard title="Active Orders" value={stats.active} icon={Clock} />
         <StatCard title="Completed" value={stats.completed} icon={CheckCircle} />
