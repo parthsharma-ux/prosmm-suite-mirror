@@ -87,7 +87,7 @@ export default function UserLayout() {
 
           <div className="flex items-center gap-2 shrink-0">
             <img src={logo} alt="7smmpanel" className="h-7" />
-            <span className="text-sm font-bold tracking-wide text-foreground hidden sm:inline">7smmpanel</span>
+            <span className="text-sm font-bold tracking-wide text-foreground">7smmpanel</span>
           </div>
 
           <nav className="hidden md:flex items-center gap-1">
