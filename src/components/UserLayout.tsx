@@ -82,7 +82,7 @@ export default function UserLayout() {
             </SheetContent>
           </Sheet>
 
-          <span className="text-sm font-bold tracking-tight text-foreground shrink-0">SMM Panel</span>
+          <span className="text-sm font-bold tracking-tight text-foreground shrink-0">7smmpanel</span>
 
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
