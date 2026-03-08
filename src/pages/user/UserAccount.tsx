@@ -10,7 +10,7 @@ import { User, Wallet, ShoppingCart, Calendar, ArrowDownCircle, ArrowUpCircle, H
 
 export default function UserAccount() {
   const { user, profile } = useAuth();
-  const { format } = useCurrency();
+  const { format, formatWallet } = useCurrency();
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["user-spending", user?.id],
