@@ -10,7 +10,8 @@ import { Save, Loader2, Upload } from "lucide-react";
 export default function AdminPaymentSettings() {
   const [upiQrUrl, setUpiQrUrl] = useState("");
   const [trc20Address, setTrc20Address] = useState("");
-  const [exchangeRate, setExchangeRate] = useState("83.50");
+  const [panelRate, setPanelRate] = useState("110");
+  const [marketRate, setMarketRate] = useState("93");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -23,7 +24,8 @@ export default function AdminPaymentSettings() {
           const details = row.details as Record<string, string> || {};
           if (row.method === "upi") setUpiQrUrl((details.qr_url || "").trim());
           if (row.method === "usdt") setTrc20Address((details.address || "").trim());
-          if (row.method === "exchange_rate") setExchangeRate(details.rate || "110");
+          if (row.method === "exchange_rate") setPanelRate(details.rate || "110");
+          if (row.method === "market_rate") setMarketRate(details.rate || "93");
         }
       }
       setLoading(false);
@@ -65,7 +67,11 @@ export default function AdminPaymentSettings() {
         { onConflict: "method" }
       ),
       supabase.from("payment_settings").upsert(
-        { method: "exchange_rate", details: { rate: exchangeRate }, updated_at: new Date().toISOString() },
+        { method: "exchange_rate", details: { rate: panelRate }, updated_at: new Date().toISOString() },
+        { onConflict: "method" }
+      ),
+      supabase.from("payment_settings").upsert(
+        { method: "market_rate", details: { rate: marketRate }, updated_at: new Date().toISOString() },
         { onConflict: "method" }
       ),
     ];
@@ -154,21 +160,42 @@ export default function AdminPaymentSettings() {
 
         <Card className="border-border">
           <CardHeader>
-            <CardTitle className="text-sm">USD → INR Exchange Rate</CardTitle>
+            <CardTitle className="text-sm">Panel Rate (Service Pricing)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">1 USD = ? INR</Label>
+              <Label className="text-xs text-muted-foreground">1 USD = ? INR (for service prices)</Label>
               <Input
                 type="number"
                 step="0.01"
-                value={exchangeRate}
-                onChange={(e) => setExchangeRate(e.target.value)}
-                placeholder="83.50"
+                value={panelRate}
+                onChange={(e) => setPanelRate(e.target.value)}
+                placeholder="110"
               />
             </div>
             <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
-              Example: $10.00 = ₹{(10 * parseFloat(exchangeRate || "0")).toFixed(2)}
+              Example: $1.00 service = ₹{(1 * parseFloat(panelRate || "0")).toFixed(2)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border">
+          <CardHeader>
+            <CardTitle className="text-sm">Market Rate (Deposits)</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">1 USDT = ? INR (for deposit conversion)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={marketRate}
+                onChange={(e) => setMarketRate(e.target.value)}
+                placeholder="93"
+              />
+            </div>
+            <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
+              Example: 1 USDT deposit = ₹{parseFloat(marketRate || "0").toFixed(2)} in wallet
             </div>
           </CardContent>
         </Card>
