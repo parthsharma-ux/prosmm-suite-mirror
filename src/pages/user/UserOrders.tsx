@@ -3,7 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrency } from "@/hooks/useCurrency";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { toast } from "sonner";
+import { RefreshCw } from "lucide-react";
 import type { Tables } from "@/types/database";
 
 type Order = Tables<"orders">;
@@ -22,6 +25,7 @@ export default function UserOrders() {
   const { format } = useCurrency();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refillingId, setRefillingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -30,6 +34,24 @@ export default function UserOrders() {
       setLoading(false);
     });
   }, [user]);
+
+  const handleRefill = async (orderId: string) => {
+    setRefillingId(orderId);
+    try {
+      const { data, error } = await supabase.functions.invoke("refill-order", {
+        body: { order_id: orderId },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast.success(`Refill requested successfully (ID: ${data.refill_id})`);
+      } else {
+        toast.error(data?.error || "Refill not available");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Refill failed");
+    }
+    setRefillingId(null);
+  };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
 
@@ -40,11 +62,17 @@ export default function UserOrders() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/30">
-              <TableHead className="font-semibold">Order ID</TableHead><TableHead className="font-semibold">Link</TableHead><TableHead className="font-semibold">Quantity</TableHead><TableHead className="font-semibold">Charge</TableHead><TableHead className="font-semibold">Status</TableHead><TableHead className="font-semibold">Date</TableHead>
+              <TableHead className="font-semibold">Order ID</TableHead>
+              <TableHead className="font-semibold">Link</TableHead>
+              <TableHead className="font-semibold">Quantity</TableHead>
+              <TableHead className="font-semibold">Charge</TableHead>
+              <TableHead className="font-semibold">Status</TableHead>
+              <TableHead className="font-semibold">Date</TableHead>
+              <TableHead className="font-semibold text-right">Refill</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {orders.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No orders yet</TableCell></TableRow>}
+            {orders.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No orders yet</TableCell></TableRow>}
             {orders.map((o) => (
               <TableRow key={o.id} className="hover:bg-muted/20 transition-colors">
                 <TableCell><Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary border-0 font-mono">{o.id.slice(0, 8)}</Badge></TableCell>
@@ -53,6 +81,19 @@ export default function UserOrders() {
                 <TableCell className="font-bold">{format(o.amount)}</TableCell>
                 <TableCell><Badge variant="outline" className={`font-semibold capitalize ${statusColors[o.status] || ""}`}>{o.status}</Badge></TableCell>
                 <TableCell className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</TableCell>
+                <TableCell className="text-right">
+                  {(o.status === "completed" || o.status === "partial") && o.provider_order_id && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={refillingId === o.id}
+                      onClick={() => handleRefill(o.id)}
+                    >
+                      <RefreshCw className={`h-3.5 w-3.5 mr-1 ${refillingId === o.id ? "animate-spin" : ""}`} />
+                      {refillingId === o.id ? "..." : "Refill"}
+                    </Button>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

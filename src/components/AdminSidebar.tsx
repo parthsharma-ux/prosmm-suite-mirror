@@ -40,7 +40,7 @@ export default function AdminSidebar() {
         <SidebarGroup>
           {!collapsed && (
             <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-3 mb-2">
-              SMM Panel
+              7smmpanel
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
