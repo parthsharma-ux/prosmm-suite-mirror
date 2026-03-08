@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
           formData.append("key", provider.api_key);
           formData.append("action", "add");
           formData.append("service", service.provider_service_id);
-          formData.append("link", link);
+          if (orderLink) formData.append("link", orderLink);
           formData.append("quantity", String(quantity));
 
           const apiRes = await fetch(provider.api_url, {
