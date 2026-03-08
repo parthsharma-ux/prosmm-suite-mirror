@@ -160,21 +160,42 @@ export default function AdminPaymentSettings() {
 
         <Card className="border-border">
           <CardHeader>
-            <CardTitle className="text-sm">USD → INR Exchange Rate</CardTitle>
+            <CardTitle className="text-sm">Panel Rate (Service Pricing)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">1 USD = ? INR</Label>
+              <Label className="text-xs text-muted-foreground">1 USD = ? INR (for service prices)</Label>
               <Input
                 type="number"
                 step="0.01"
-                value={exchangeRate}
-                onChange={(e) => setExchangeRate(e.target.value)}
-                placeholder="83.50"
+                value={panelRate}
+                onChange={(e) => setPanelRate(e.target.value)}
+                placeholder="110"
               />
             </div>
             <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
-              Example: $10.00 = ₹{(10 * parseFloat(exchangeRate || "0")).toFixed(2)}
+              Example: $1.00 service = ₹{(1 * parseFloat(panelRate || "0")).toFixed(2)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border">
+          <CardHeader>
+            <CardTitle className="text-sm">Market Rate (Deposits)</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">1 USDT = ? INR (for deposit conversion)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={marketRate}
+                onChange={(e) => setMarketRate(e.target.value)}
+                placeholder="93"
+              />
+            </div>
+            <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
+              Example: 1 USDT deposit = ₹{parseFloat(marketRate || "0").toFixed(2)} in wallet
             </div>
           </CardContent>
         </Card>
