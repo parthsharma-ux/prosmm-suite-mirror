@@ -31,6 +31,7 @@ export default function UserFunds() {
   const [loading, setLoading] = useState(true);
   const [upiQrUrl, setUpiQrUrl] = useState("");
   const [trc20Address, setTrc20Address] = useState("");
+  const [marketRate, setMarketRate] = useState(93);
 
   const fetchPayments = () => {
     if (!user) return;
