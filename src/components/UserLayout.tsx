@@ -82,7 +82,7 @@ export default function UserLayout() {
             </SheetContent>
           </Sheet>
 
-          <span className="text-sm font-bold tracking-tight text-foreground shrink-0">7smmpanel</span>
+          <img src={logo} alt="7smmpanel" className="h-7 shrink-0" />
 
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
