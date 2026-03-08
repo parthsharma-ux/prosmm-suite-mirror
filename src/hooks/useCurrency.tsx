@@ -27,11 +27,18 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState<Currency>(() => {
     return (localStorage.getItem("currency") as Currency) || "USD";
   });
-  const [exchangeRate, setExchangeRate] = useState(83.5);
+  const [exchangeRate, setExchangeRate] = useState(110);
 
   useEffect(() => {
-    // Exchange rate could be stored in payment_settings but the schema changed.
-    // For now use default rate. Can be updated later.
+    const fetchRate = async () => {
+      const { data } = await supabase.from("payment_settings").select("details").eq("method", "exchange_rate").single();
+      if (data) {
+        const details = data.details as Record<string, string> || {};
+        const rate = parseFloat(details.rate);
+        if (!isNaN(rate) && rate > 0) setExchangeRate(rate);
+      }
+    };
+    fetchRate();
   }, []);
 
   const setCurrency = (c: Currency) => {

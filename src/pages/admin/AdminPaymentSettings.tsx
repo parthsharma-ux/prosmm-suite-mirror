@@ -64,6 +64,10 @@ export default function AdminPaymentSettings() {
         { method: "usdt", details: { address: trc20Address.trim() }, updated_at: new Date().toISOString() },
         { onConflict: "method" }
       ),
+      supabase.from("payment_settings").upsert(
+        { method: "exchange_rate", details: { rate: exchangeRate }, updated_at: new Date().toISOString() },
+        { onConflict: "method" }
+      ),
     ];
     const results = await Promise.all(updates);
     const hasError = results.some((r) => r.error);
