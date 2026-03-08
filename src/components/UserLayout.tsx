@@ -123,7 +123,7 @@ export default function UserLayout() {
           {/* Mobile: balance + currency */}
           <div className="md:hidden flex items-center gap-2">
             <CurrencyToggle />
-            <span className="text-xs font-semibold text-foreground whitespace-nowrap">{format(balance)}</span>
+            <span className="text-xs font-semibold text-foreground whitespace-nowrap">{formatWallet(balance)}</span>
           </div>
         </div>
       </header>
