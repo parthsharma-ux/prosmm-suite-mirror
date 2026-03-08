@@ -2,7 +2,7 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrency } from "@/hooks/useCurrency";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Package, ShoppingCart, Wallet, LogOut, Menu, MessageCircle, TicketCheck } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Wallet, LogOut, Menu, MessageCircle, TicketCheck, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ThemeToggle from "@/components/ThemeToggle";
 import CurrencyToggle from "@/components/CurrencyToggle";
