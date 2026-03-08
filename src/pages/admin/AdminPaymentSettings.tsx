@@ -23,6 +23,7 @@ export default function AdminPaymentSettings() {
           const details = row.details as Record<string, string> || {};
           if (row.method === "upi") setUpiQrUrl((details.qr_url || "").trim());
           if (row.method === "usdt") setTrc20Address((details.address || "").trim());
+          if (row.method === "exchange_rate") setExchangeRate(details.rate || "110");
         }
       }
       setLoading(false);
