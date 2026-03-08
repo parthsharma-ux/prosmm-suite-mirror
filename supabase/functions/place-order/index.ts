@@ -38,12 +38,13 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
     const { public_service_id, link, quantity } = await req.json();
-    if (!public_service_id || !link || !quantity) {
-      return new Response(JSON.stringify({ error: "Missing fields: public_service_id, link, quantity" }), {
+    if (!public_service_id || !quantity) {
+      return new Response(JSON.stringify({ error: "Missing fields: public_service_id, quantity" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const orderLink = link || "";
 
     // Get the service
     const { data: service, error: svcError } = await adminClient
@@ -115,7 +116,7 @@ Deno.serve(async (req) => {
           formData.append("key", provider.api_key);
           formData.append("action", "add");
           formData.append("service", service.provider_service_id);
-          formData.append("link", link);
+          if (orderLink) formData.append("link", orderLink);
           formData.append("quantity", String(quantity));
 
           const apiRes = await fetch(provider.api_url, {
@@ -141,7 +142,7 @@ Deno.serve(async (req) => {
       .insert({
         user_id: user.id,
         service_id: public_service_id,
-        link,
+        link: orderLink,
         quantity,
         amount,
         status: providerOrderId ? "processing" : "pending",
