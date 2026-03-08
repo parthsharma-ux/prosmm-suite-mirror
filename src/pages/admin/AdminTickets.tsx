@@ -45,9 +45,9 @@ export default function AdminTickets() {
   const handleReply = async () => {
     if (!selected || !reply.trim()) return;
     setSubmitting(true);
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("tickets")
-      .update({ admin_reply: reply.trim(), status: "answered", updated_at: new Date().toISOString() } as any)
+      .update({ admin_reply: reply.trim(), status: "answered", updated_at: new Date().toISOString() })
       .eq("id", selected.id);
     if (error) {
       toast.error("Failed to reply");
