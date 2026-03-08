@@ -32,9 +32,9 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-lg border-border/50">
         <CardHeader className="text-center space-y-3 pb-2">
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-1">
             <img src={logo} alt="7smmpanel" className="h-16 object-contain" />
-            <span className="text-lg font-bold tracking-tight text-foreground">7smmpanel</span>
+            <span className="text-base font-semibold tracking-widest uppercase text-primary">7smmpanel</span>
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Sign In</h1>
