@@ -63,7 +63,7 @@ export default function UserServices() {
       const res = await fetch(`https://${projectId}.supabase.co/functions/v1/place-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ public_service_id: service.id, link: link.trim(), quantity }),
+        body: JSON.stringify({ public_service_id: service.id, link: link.trim() || "", quantity }),
       });
       const data = await res.json();
       if (!res.ok) toast.error(data.error || "Failed to place order");
