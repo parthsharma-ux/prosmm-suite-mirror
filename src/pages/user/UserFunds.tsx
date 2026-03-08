@@ -122,7 +122,7 @@ export default function UserFunds() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Amount ($)</Label>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Amount ({method === "usdt" ? "$" : "₹"})</Label>
               <Input type="number" step="0.01" min="1" value={amount || ""} onChange={(e) => setAmount(Number(e.target.value))} required className="w-full" />
             </div>
             <div className="space-y-1.5">
