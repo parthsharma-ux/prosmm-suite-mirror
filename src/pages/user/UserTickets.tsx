@@ -37,12 +37,12 @@ export default function UserTickets() {
 
   const fetchTickets = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("tickets")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
-    setTickets((data as Ticket[]) || []);
+    setTickets(data || []);
     setLoading(false);
   };
 
