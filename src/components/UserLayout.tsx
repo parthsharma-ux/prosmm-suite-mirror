@@ -1,4 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrency } from "@/hooks/useCurrency";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,8 @@ export default function UserLayout() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0 bg-card border-border">
+            <SheetContent side="left" className="w-64 p-0 bg-card border-border" aria-describedby={undefined}>
+              <VisuallyHidden><span>Navigation Menu</span></VisuallyHidden>
               <div className="flex flex-col h-full">
                 <div className="h-14 flex items-center gap-2 px-4 border-b border-border">
                   <img src={logo} alt="7smmpanel" className="h-6" />
