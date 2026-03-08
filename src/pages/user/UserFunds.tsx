@@ -107,7 +107,8 @@ export default function UserFunds() {
               <span className="text-xs font-mono text-foreground break-all flex-1">{trc20Address}</span>
               <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={copyAddress}><Copy className="h-4 w-4" /></Button>
             </div>
-            <p className="text-xs text-muted-foreground">Send exact amount and submit the Transaction ID below</p>
+             <p className="text-xs text-muted-foreground">Send exact amount and submit the Transaction ID below</p>
+             <p className="text-xs font-medium text-primary">Market Rate: 1 USDT = ₹{marketRate}</p>
           </CardContent>
         </Card>
       )}
