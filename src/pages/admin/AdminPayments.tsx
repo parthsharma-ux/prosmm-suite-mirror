@@ -31,16 +31,19 @@ export default function AdminPayments() {
     await supabase.from("payment_requests").update({ status: "approved" as const }).eq("id", p.id);
     
     // Wallet stores USD. Convert based on method:
-    // UPI: amount is in INR, divide by exchange_rate to get USD
+    // UPI: amount is in INR, divide by market_rate to get USD (so ₹100 / 93 = ~$1.075, displays back as ₹100)
     // USDT: amount is already in USD
     let creditAmountUSD = p.amount;
     if (p.method === "upi") {
-      const { data: rateData } = await supabase.from("payment_settings").select("details").eq("method", "exchange_rate").maybeSingle();
+      const { data: rateData } = await supabase.from("payment_settings").select("details").eq("method", "market_rate").maybeSingle();
+      const fallbackRate = 93;
+      let rate = fallbackRate;
       if (rateData) {
         const details = rateData.details as Record<string, string> || {};
-        const rate = parseFloat(details.rate);
-        if (!isNaN(rate) && rate > 0) creditAmountUSD = p.amount / rate;
+        const parsed = parseFloat(details.rate);
+        if (!isNaN(parsed) && parsed > 0) rate = parsed;
       }
+      creditAmountUSD = p.amount / rate;
     }
     
     const { data: profile } = await supabase.from("profiles").select("wallet_balance").eq("user_id", p.user_id).single();
