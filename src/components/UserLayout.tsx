@@ -9,7 +9,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import CurrencyToggle from "@/components/CurrencyToggle";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo-small.webp";
 
 const navItems = [
   { title: "New Order", url: "/dashboard/services", icon: Package },
