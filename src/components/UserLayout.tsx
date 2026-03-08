@@ -23,7 +23,7 @@ const navItems = [
 
 export default function UserLayout() {
   const { signOut, profile } = useAuth();
-  const { format } = useCurrency();
+  const { formatWallet } = useCurrency();
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
