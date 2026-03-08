@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
+import { RefreshCw } from "lucide-react";
 import type { Tables } from "@/types/database";
 
 type Order = Tables<"orders">;
@@ -22,6 +23,7 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchOrders = async () => {
     let q = supabase.from("orders").select("*").order("created_at", { ascending: false });
@@ -45,18 +47,37 @@ export default function AdminOrders() {
     fetchOrders();
   };
 
+  const refreshStatuses = async () => {
+    setRefreshing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("check-order-status");
+      if (error) throw error;
+      toast.success(`Status check complete: ${data?.updated || 0} orders updated`);
+      fetchOrders();
+    } catch (e: any) {
+      toast.error("Failed to refresh statuses");
+    }
+    setRefreshing(false);
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold tracking-tight">Orders</h2>
-        <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem><SelectItem value="pending">Pending</SelectItem><SelectItem value="processing">Processing</SelectItem><SelectItem value="completed">Completed</SelectItem><SelectItem value="partial">Partial</SelectItem><SelectItem value="cancelled">Cancelled</SelectItem><SelectItem value="failed">Failed</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={refreshStatuses} disabled={refreshing}>
+            <RefreshCw className={`h-4 w-4 mr-1 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Checking..." : "Refresh Status"}
+          </Button>
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem><SelectItem value="pending">Pending</SelectItem><SelectItem value="processing">Processing</SelectItem><SelectItem value="completed">Completed</SelectItem><SelectItem value="partial">Partial</SelectItem><SelectItem value="cancelled">Cancelled</SelectItem><SelectItem value="failed">Failed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div className="rounded-lg border bg-card overflow-hidden">
         <Table>

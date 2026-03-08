@@ -2,7 +2,7 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrency } from "@/hooks/useCurrency";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Package, ShoppingCart, Wallet, LogOut, Menu } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Wallet, LogOut, Menu, MessageCircle, TicketCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ThemeToggle from "@/components/ThemeToggle";
 import CurrencyToggle from "@/components/CurrencyToggle";
@@ -13,6 +13,8 @@ const navItems = [
   { title: "New Order", url: "/dashboard/services", icon: Package },
   { title: "Orders", url: "/dashboard/orders", icon: ShoppingCart },
   { title: "Add Funds", url: "/dashboard/funds", icon: Wallet },
+  { title: "Tickets", url: "/dashboard/tickets", icon: TicketCheck },
+  { title: "Contact", url: "/dashboard/contact", icon: MessageCircle },
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
 ];
 

@@ -19,10 +19,13 @@ import AdminOrders from "@/pages/admin/AdminOrders";
 import AdminPayments from "@/pages/admin/AdminPayments";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminPaymentSettings from "@/pages/admin/AdminPaymentSettings";
+import AdminTickets from "@/pages/admin/AdminTickets";
 import UserDashboard from "@/pages/user/UserDashboard";
 import UserServices from "@/pages/user/UserServices";
 import UserOrders from "@/pages/user/UserOrders";
 import UserFunds from "@/pages/user/UserFunds";
+import UserContact from "@/pages/user/UserContact";
+import UserTickets from "@/pages/user/UserTickets";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +61,7 @@ const App = () => (
               <Route path="payments" element={<AdminPayments />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="payment-settings" element={<AdminPaymentSettings />} />
+              <Route path="tickets" element={<AdminTickets />} />
             </Route>
 
             {/* User routes */}
@@ -66,6 +70,8 @@ const App = () => (
               <Route path="services" element={<UserServices />} />
               <Route path="orders" element={<UserOrders />} />
               <Route path="funds" element={<UserFunds />} />
+              <Route path="contact" element={<UserContact />} />
+              <Route path="tickets" element={<UserTickets />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

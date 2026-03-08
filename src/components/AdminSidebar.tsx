@@ -1,4 +1,4 @@
-import { LayoutDashboard, Server, Package, ShoppingCart, CreditCard, Users, LogOut, Layers, Link2, Banknote } from "lucide-react";
+import { LayoutDashboard, Server, Package, ShoppingCart, CreditCard, Users, LogOut, Layers, Link2, Banknote, TicketCheck } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -26,6 +26,7 @@ const navItems = [
   { title: "Payments", url: "/admin/payments", icon: CreditCard },
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Payment Settings", url: "/admin/payment-settings", icon: Banknote },
+  { title: "Tickets", url: "/admin/tickets", icon: TicketCheck },
 ];
 
 export default function AdminSidebar() {
