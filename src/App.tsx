@@ -26,6 +26,7 @@ import UserOrders from "@/pages/user/UserOrders";
 import UserFunds from "@/pages/user/UserFunds";
 import UserContact from "@/pages/user/UserContact";
 import UserTickets from "@/pages/user/UserTickets";
+import UserAccount from "@/pages/user/UserAccount";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,7 @@ const App = () => (
               <Route path="funds" element={<UserFunds />} />
               <Route path="contact" element={<UserContact />} />
               <Route path="tickets" element={<UserTickets />} />
+              <Route path="account" element={<UserAccount />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
