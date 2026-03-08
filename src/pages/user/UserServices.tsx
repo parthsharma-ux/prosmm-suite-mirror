@@ -55,6 +55,7 @@ export default function UserServices() {
     e.preventDefault();
     if (!user || !service) return;
     if (quantity < service.min_quantity || quantity > service.max_quantity) { toast.error(`Quantity must be between ${service.min_quantity} and ${service.max_quantity}`); return; }
+    if (!link.trim()) { toast.error("Link or username is required"); return; }
     setSubmitting(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -167,7 +168,7 @@ export default function UserServices() {
 
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><LinkIcon className="h-3 w-3" /> Link</Label>
-              <Input type="url" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://example.com/post (optional)" className="w-full h-11" />
+              <Input type="text" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://example.com/post or @username" required className="w-full h-11" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 min-w-0">
