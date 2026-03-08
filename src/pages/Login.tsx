@@ -34,6 +34,7 @@ export default function Login() {
         <CardHeader className="text-center space-y-3 pb-2">
           <div className="flex justify-center">
             <img src={logo} alt="7smmpanel" className="h-16 object-contain" />
+            <span className="text-lg font-bold tracking-tight text-foreground">7smmpanel</span>
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Sign In</h1>
