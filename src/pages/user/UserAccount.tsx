@@ -28,6 +28,20 @@ export default function UserAccount() {
     enabled: !!user?.id,
   });
 
+  const { data: transactions, isLoading: txLoading } = useQuery({
+    queryKey: ["user-transactions", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      return data ?? [];
+    },
+    enabled: !!user?.id,
+  });
+
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <h1 className="text-xl font-bold text-foreground">My Account</h1>
@@ -93,6 +107,59 @@ export default function UserAccount() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Transaction History */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <History className="h-4 w-4" /> Transaction History
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {txLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : !transactions?.length ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No transactions yet</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="text-right">Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((tx) => {
+                    const isCredit = tx.type === "deposit" || tx.type === "credit" || tx.type === "refund";
+                    return (
+                      <TableRow key={tx.id}>
+                        <TableCell>
+                          <Badge variant={isCredit ? "default" : "secondary"} className="gap-1 text-xs">
+                            {isCredit ? <ArrowDownCircle className="h-3 w-3" /> : <ArrowUpCircle className="h-3 w-3" />}
+                            {tx.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{tx.description || "—"}</TableCell>
+                        <TableCell className={`text-right text-sm font-medium ${isCredit ? "text-green-600 dark:text-green-400" : "text-foreground"}`}>
+                          {isCredit ? "+" : "−"}{format(Math.abs(Number(tx.amount)))}
+                        </TableCell>
+                        <TableCell className="text-right text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(tx.created_at).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
