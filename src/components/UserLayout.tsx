@@ -16,6 +16,7 @@ const navItems = [
   { title: "Add Funds", url: "/dashboard/funds", icon: Wallet },
   { title: "Tickets", url: "/dashboard/tickets", icon: TicketCheck },
   { title: "Contact", url: "/dashboard/contact", icon: MessageCircle },
+  { title: "Account", url: "/dashboard/account", icon: UserCircle },
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
 ];
 
