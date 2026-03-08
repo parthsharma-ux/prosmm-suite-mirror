@@ -167,9 +167,9 @@ export default function UserServices() {
             )}
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><LinkIcon className="h-3 w-3" /> Link</Label>
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><LinkIcon className="h-3 w-3" /> Link / @Username</Label>
               <Input type="text" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://example.com/post or @username" required className="w-full h-11" />
-            </div>
+              <p className="text-[11px] text-muted-foreground">Enter a URL link or @username depending on the service</p>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2 min-w-0">
                 <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Hash className="h-3 w-3" /> Quantity</Label>
