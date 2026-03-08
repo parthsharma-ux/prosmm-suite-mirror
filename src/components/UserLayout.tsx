@@ -43,8 +43,9 @@ export default function UserLayout() {
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0 bg-card border-border">
               <div className="flex flex-col h-full">
-                <div className="h-14 flex items-center px-4 border-b border-border">
+                <div className="h-14 flex items-center gap-2 px-4 border-b border-border">
                   <img src={logo} alt="7smmpanel" className="h-6" />
+                  <span className="text-sm font-bold tracking-wide text-foreground">7smmpanel</span>
                 </div>
                 <nav className="flex-1 py-3 px-2 space-y-1">
                   {navItems.map((item) => (
