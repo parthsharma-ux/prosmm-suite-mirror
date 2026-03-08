@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCurrency } from "@/hooks/useCurrency";
 import StatCard from "@/components/StatCard";
-import { Wallet, ShoppingCart, CheckCircle, Clock, TrendingUp, IndianRupee } from "lucide-react";
+import { Wallet, ShoppingCart, CheckCircle, Clock, IndianRupee } from "lucide-react";
 
 export default function UserDashboard() {
   const { user, profile } = useAuth();
