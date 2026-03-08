@@ -31,7 +31,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const fetchRate = async () => {
-      const { data } = await supabase.from("payment_settings").select("details").eq("method", "exchange_rate").single();
+      const { data } = await supabase.from("payment_settings").select("details").eq("method", "exchange_rate").maybeSingle();
       if (data) {
         const details = data.details as Record<string, string> || {};
         const rate = parseFloat(details.rate);
