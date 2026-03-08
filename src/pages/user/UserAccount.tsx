@@ -81,7 +81,7 @@ export default function UserAccount() {
           <CardContent className="pt-6 text-center">
             <Wallet className="h-6 w-6 mx-auto text-primary mb-2" />
             <p className="text-xs text-muted-foreground">Wallet Balance</p>
-            <p className="text-lg font-bold text-foreground">{format(profile?.wallet_balance ?? 0)}</p>
+            <p className="text-lg font-bold text-foreground">{formatWallet(profile?.wallet_balance ?? 0)}</p>
           </CardContent>
         </Card>
         <Card>
