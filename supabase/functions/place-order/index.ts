@@ -38,12 +38,13 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
     const { public_service_id, link, quantity } = await req.json();
-    if (!public_service_id || !link || !quantity) {
-      return new Response(JSON.stringify({ error: "Missing fields: public_service_id, link, quantity" }), {
+    if (!public_service_id || !quantity) {
+      return new Response(JSON.stringify({ error: "Missing fields: public_service_id, quantity" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const orderLink = link || "";
 
     // Get the service
     const { data: service, error: svcError } = await adminClient
