@@ -10,7 +10,8 @@ import { Save, Loader2, Upload } from "lucide-react";
 export default function AdminPaymentSettings() {
   const [upiQrUrl, setUpiQrUrl] = useState("");
   const [trc20Address, setTrc20Address] = useState("");
-  const [exchangeRate, setExchangeRate] = useState("83.50");
+  const [panelRate, setPanelRate] = useState("110");
+  const [marketRate, setMarketRate] = useState("93");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
