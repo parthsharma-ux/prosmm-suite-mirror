@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
       .insert({
         user_id: user.id,
         service_id: public_service_id,
-        link,
+        link: orderLink,
         quantity,
         amount,
         status: providerOrderId ? "processing" : "pending",
