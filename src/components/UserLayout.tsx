@@ -114,7 +114,7 @@ export default function UserLayout() {
         <div className="flex items-center gap-2 md:gap-3 shrink-0">
           <div className="hidden md:block"><CurrencyToggle /></div>
           <div className="hidden md:block text-sm text-muted-foreground whitespace-nowrap">
-            <span className="font-semibold text-foreground">{format(balance)}</span>
+            <span className="font-semibold text-foreground">{formatWallet(balance)}</span>
           </div>
           <div className="hidden md:block"><ThemeToggle /></div>
           <Button variant="ghost" size="sm" onClick={signOut} className="hidden md:flex text-muted-foreground px-2">
