@@ -5,8 +5,9 @@ import { Navigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { toast } from "sonner";
+import logo from "@/assets/logo.png";
 
 export default function Login() {
   const { user, role, loading } = useAuth();
@@ -15,7 +16,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) return null;
-  if (user && role) return <Navigate to={role === "admin" ? "/admin" : "/dashboard"} replace />;
+  if (user && role) return <Navigate to={role === "admin" ? "/admin" : "/dashboard/services"} replace />;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,9 +31,14 @@ export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-lg border-border/50">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold tracking-tight">Sign In</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
+        <CardHeader className="text-center space-y-3 pb-2">
+          <div className="flex justify-center">
+            <img src={logo} alt="7smmpanel" className="h-16 object-contain" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Sign In</h1>
+            <p className="text-sm text-muted-foreground mt-1">Enter your credentials to access your account</p>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
