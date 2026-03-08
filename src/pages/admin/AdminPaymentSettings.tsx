@@ -67,7 +67,11 @@ export default function AdminPaymentSettings() {
         { onConflict: "method" }
       ),
       supabase.from("payment_settings").upsert(
-        { method: "exchange_rate", details: { rate: exchangeRate }, updated_at: new Date().toISOString() },
+        { method: "exchange_rate", details: { rate: panelRate }, updated_at: new Date().toISOString() },
+        { onConflict: "method" }
+      ),
+      supabase.from("payment_settings").upsert(
+        { method: "market_rate", details: { rate: marketRate }, updated_at: new Date().toISOString() },
         { onConflict: "method" }
       ),
     ];
