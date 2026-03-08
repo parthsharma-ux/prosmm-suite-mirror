@@ -55,7 +55,6 @@ export default function UserServices() {
     e.preventDefault();
     if (!user || !service) return;
     if (quantity < service.min_quantity || quantity > service.max_quantity) { toast.error(`Quantity must be between ${service.min_quantity} and ${service.max_quantity}`); return; }
-    if (!link.trim()) { toast.error("Link is required"); return; }
     setSubmitting(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
