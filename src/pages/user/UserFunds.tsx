@@ -49,6 +49,10 @@ export default function UserFunds() {
           const details = row.details as Record<string, string> || {};
           if (row.method === "upi") setUpiQrUrl(details.qr_url || "");
           if (row.method === "usdt") setTrc20Address(details.address || "");
+          if (row.method === "market_rate") {
+            const rate = parseFloat(details.rate);
+            if (!isNaN(rate) && rate > 0) setMarketRate(rate);
+          }
         }
       }
     });
