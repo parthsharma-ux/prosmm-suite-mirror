@@ -23,6 +23,7 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchOrders = async () => {
     let q = supabase.from("orders").select("*").order("created_at", { ascending: false });
@@ -46,10 +47,6 @@ export default function AdminOrders() {
     fetchOrders();
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
-
-  const [refreshing, setRefreshing] = useState(false);
-
   const refreshStatuses = async () => {
     setRefreshing(true);
     try {
@@ -62,6 +59,8 @@ export default function AdminOrders() {
     }
     setRefreshing(false);
   };
+
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
 
   return (
     <div className="space-y-6">
@@ -79,6 +78,7 @@ export default function AdminOrders() {
             </SelectContent>
           </Select>
         </div>
+      </div>
       <div className="rounded-lg border bg-card overflow-hidden">
         <Table>
           <TableHeader><TableRow><TableHead>ID</TableHead><TableHead>Link</TableHead><TableHead>Qty</TableHead><TableHead>Charge</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
