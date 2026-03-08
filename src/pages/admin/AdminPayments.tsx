@@ -30,21 +30,23 @@ export default function AdminPayments() {
     if (!confirm("Approve this payment?")) return;
     await supabase.from("payment_requests").update({ status: "approved" as const }).eq("id", p.id);
     
-    // For USDT payments, convert using market rate to get INR value
-    let creditAmount = p.amount;
-    if (p.method === "usdt") {
-      const { data: rateData } = await supabase.from("payment_settings").select("details").eq("method", "market_rate").maybeSingle();
+    // Wallet stores USD. Convert based on method:
+    // UPI: amount is in INR, divide by exchange_rate to get USD
+    // USDT: amount is already in USD
+    let creditAmountUSD = p.amount;
+    if (p.method === "upi") {
+      const { data: rateData } = await supabase.from("payment_settings").select("details").eq("method", "exchange_rate").maybeSingle();
       if (rateData) {
         const details = rateData.details as Record<string, string> || {};
         const rate = parseFloat(details.rate);
-        if (!isNaN(rate) && rate > 0) creditAmount = p.amount * rate;
+        if (!isNaN(rate) && rate > 0) creditAmountUSD = p.amount / rate;
       }
     }
     
     const { data: profile } = await supabase.from("profiles").select("wallet_balance").eq("user_id", p.user_id).single();
     if (profile) {
-      await supabase.from("profiles").update({ wallet_balance: profile.wallet_balance + creditAmount }).eq("user_id", p.user_id);
-      await supabase.from("transactions").insert({ user_id: p.user_id, type: "credit" as const, amount: creditAmount, description: `Payment via ${p.method} - ${p.transaction_id || ''} (${p.method === 'usdt' ? p.amount + ' USDT' : '$' + p.amount})` });
+      await supabase.from("profiles").update({ wallet_balance: profile.wallet_balance + creditAmountUSD }).eq("user_id", p.user_id);
+      await supabase.from("transactions").insert({ user_id: p.user_id, type: "credit" as const, amount: creditAmountUSD, description: `Payment via ${p.method} - ${p.transaction_id || ''} (${p.method === 'usdt' ? '$' + p.amount : '₹' + p.amount})` });
     }
     toast.success("Payment approved & wallet credited");
     fetchPayments();
