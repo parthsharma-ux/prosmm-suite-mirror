@@ -51,11 +51,11 @@ export default function UserTickets() {
   const handleSubmit = async () => {
     if (!subject.trim() || !message.trim() || !user) return;
     setSubmitting(true);
-    const { error } = await supabase.from("tickets").insert({
+    const { error } = await (supabase as any).from("tickets").insert({
       user_id: user.id,
       subject: subject.trim(),
       message: message.trim(),
-    } as any);
+    });
     if (error) {
       toast.error("Failed to create ticket");
     } else {

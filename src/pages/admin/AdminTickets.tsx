@@ -61,7 +61,7 @@ export default function AdminTickets() {
   };
 
   const closeTicket = async (id: string) => {
-    await supabase.from("tickets").update({ status: "closed", updated_at: new Date().toISOString() } as any).eq("id", id);
+    await (supabase as any).from("tickets").update({ status: "closed", updated_at: new Date().toISOString() }).eq("id", id);
     toast.success("Ticket closed");
     fetchTickets();
   };
