@@ -71,7 +71,7 @@ export default function AdminPayments() {
             {payments.map((p) => (
               <TableRow key={p.id}>
                 <TableCell className="uppercase font-medium text-xs">{p.method}</TableCell>
-                <TableCell>${p.amount}</TableCell>
+                <TableCell>{p.method === "usdt" ? "$" : "₹"}{p.amount}</TableCell>
                 <TableCell className="font-mono text-xs max-w-32 truncate">{p.transaction_id || "—"}</TableCell>
                 <TableCell><Badge variant="outline" className={statusColors[p.status] || ""}>{p.status}</Badge></TableCell>
                 <TableCell className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</TableCell>
