@@ -94,8 +94,7 @@ export default function UserFunds() {
             <div className="rounded-xl border-2 border-primary/20 p-2 bg-background shadow-lg">
               <img src={upiQrUrl} alt="UPI QR Code" className="w-52 h-52 rounded-lg object-contain" />
             </div>
-             <p className="text-xs text-muted-foreground">Pay using any UPI app and submit the UTR below</p>
-             <p className="text-xs font-medium text-primary">Market Rate: 1 USDT = ₹{marketRate}</p>
+            <p className="text-xs text-muted-foreground">Pay using any UPI app and submit the UTR below</p>
           </CardContent>
         </Card>
       )}
@@ -107,8 +106,7 @@ export default function UserFunds() {
               <span className="text-xs font-mono text-foreground break-all flex-1">{trc20Address}</span>
               <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={copyAddress}><Copy className="h-4 w-4" /></Button>
             </div>
-             <p className="text-xs text-muted-foreground">Send exact amount and submit the Transaction ID below</p>
-             <p className="text-xs font-medium text-primary">Market Rate: 1 USDT = ₹{marketRate}</p>
+            <p className="text-xs text-muted-foreground">Send exact amount and submit the Transaction ID below</p>
           </CardContent>
         </Card>
       )}
@@ -124,7 +122,7 @@ export default function UserFunds() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Amount ($)</Label>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Amount ({method === "usdt" ? "$" : "₹"})</Label>
               <Input type="number" step="0.01" min="1" value={amount || ""} onChange={(e) => setAmount(Number(e.target.value))} required className="w-full" />
             </div>
             <div className="space-y-1.5">
@@ -148,7 +146,7 @@ export default function UserFunds() {
             {payments.map((p) => (
               <TableRow key={p.id}>
                 <TableCell className="uppercase font-medium text-xs">{p.method}</TableCell>
-                <TableCell>${p.amount}</TableCell>
+                <TableCell>{p.method === "usdt" ? "$" : "₹"}{p.amount}</TableCell>
                 <TableCell className="font-mono text-xs max-w-32 truncate">{p.transaction_id || "—"}</TableCell>
                 <TableCell><Badge variant="outline" className={statusColors[p.status] || ""}>{p.status}</Badge></TableCell>
                 <TableCell className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</TableCell>
