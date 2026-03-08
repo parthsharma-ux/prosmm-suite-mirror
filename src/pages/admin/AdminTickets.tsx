@@ -33,10 +33,10 @@ export default function AdminTickets() {
   const [submitting, setSubmitting] = useState(false);
 
   const fetchTickets = async () => {
-    let q = supabase.from("tickets").select("*").order("created_at", { ascending: false });
+    let q = (supabase as any).from("tickets").select("*").order("created_at", { ascending: false });
     if (filter !== "all") q = q.eq("status", filter);
     const { data } = await q;
-    setTickets((data as Ticket[]) || []);
+    setTickets(data || []);
     setLoading(false);
   };
 
