@@ -70,7 +70,7 @@ export default function UserLayout() {
                 <div className="border-t border-border p-3 space-y-2">
                   <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-muted">
                     <span className="text-xs text-muted-foreground">Balance</span>
-                    <span className="text-sm font-semibold text-foreground">{format(balance)}</span>
+                    <span className="text-sm font-semibold text-foreground">{formatWallet(balance)}</span>
                   </div>
                   <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-1">
