@@ -8,6 +8,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import CurrencyToggle from "@/components/CurrencyToggle";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   { title: "New Order", url: "/dashboard/services", icon: Package },
@@ -42,7 +43,7 @@ export default function UserLayout() {
             <SheetContent side="left" className="w-64 p-0 bg-card border-border">
               <div className="flex flex-col h-full">
                 <div className="h-14 flex items-center px-4 border-b border-border">
-                  <span className="text-sm font-bold tracking-tight text-foreground">7smmpanel</span>
+                  <img src={logo} alt="7smmpanel" className="h-6" />
                 </div>
                 <nav className="flex-1 py-3 px-2 space-y-1">
                   {navItems.map((item) => (
@@ -82,7 +83,7 @@ export default function UserLayout() {
             </SheetContent>
           </Sheet>
 
-          <span className="text-sm font-bold tracking-tight text-foreground shrink-0">7smmpanel</span>
+          <img src={logo} alt="7smmpanel" className="h-7 shrink-0" />
 
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
