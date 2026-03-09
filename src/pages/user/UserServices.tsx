@@ -102,7 +102,7 @@ export default function UserServices() {
       <form onSubmit={handleOrder} className="space-y-4">
         {/* Category & Search Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden">
+          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden animate-slide-up" style={{ animationDelay: '0.05s', animationFillMode: 'both' }}>
             <CardContent className="p-4">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 block">Category</Label>
               <Select value={selectedCategory || "__all__"} onValueChange={(v) => { setSelectedCategory(v === "__all__" ? "" : v); setSelectedService(""); }}>
