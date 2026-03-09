@@ -102,7 +102,7 @@ export default function UserServices() {
       <form onSubmit={handleOrder} className="space-y-4">
         {/* Category & Search Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden">
+          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden animate-slide-up" style={{ animationDelay: '0.05s', animationFillMode: 'both' }}>
             <CardContent className="p-4">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 block">Category</Label>
               <Select value={selectedCategory || "__all__"} onValueChange={(v) => { setSelectedCategory(v === "__all__" ? "" : v); setSelectedService(""); }}>
@@ -117,7 +117,7 @@ export default function UserServices() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden">
+          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden animate-slide-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
             <CardContent className="p-4">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 block">Search</Label>
               <div className="relative">
@@ -134,7 +134,7 @@ export default function UserServices() {
         </div>
 
         {/* Service Selector */}
-        <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden">
+        <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden animate-slide-up" style={{ animationDelay: '0.15s', animationFillMode: 'both' }}>
           <CardContent className="p-4">
             <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 block">Service</Label>
             <Select value={selectedService || "__none__"} onValueChange={(v) => { const id = v === "__none__" ? "" : v; setSelectedService(id); const s = services.find((x) => x.id === id); if (s) setQuantity(s.min_quantity); }}>
@@ -172,7 +172,7 @@ export default function UserServices() {
 
         {/* Selected Service Detail */}
         {service && (
-          <Card className="border-primary/20 shadow-md bg-gradient-to-br from-primary/[0.04] to-primary/[0.08] backdrop-blur-sm overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+          <Card className="border-primary/20 shadow-md bg-gradient-to-br from-primary/[0.04] to-primary/[0.08] backdrop-blur-sm overflow-hidden animate-enter transition-all duration-300">
             <CardContent className="p-4">
               <div className="flex items-start gap-3 min-w-0 w-full">
                 <div className="p-1.5 rounded-lg bg-primary/10 mt-0.5 shrink-0">
@@ -209,7 +209,7 @@ export default function UserServices() {
         )}
 
         {/* Link Input */}
-        <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden">
+        <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden animate-slide-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
           <CardContent className="p-4">
             <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 flex items-center gap-1.5">
               <LinkIcon className="h-3 w-3" /> Link / @Username
@@ -228,7 +228,7 @@ export default function UserServices() {
 
         {/* Quantity & Charge */}
         <div className="grid grid-cols-2 gap-3">
-          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden">
+          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden animate-slide-up" style={{ animationDelay: '0.25s', animationFillMode: 'both' }}>
             <CardContent className="p-4">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 flex items-center gap-1.5">
                 <Hash className="h-3 w-3" /> Quantity
@@ -245,7 +245,7 @@ export default function UserServices() {
               />
             </CardContent>
           </Card>
-          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden">
+          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden animate-slide-up" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
             <CardContent className="p-4">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 block">Total Charge</Label>
               <div className="flex items-center h-10 rounded-md border border-border/50 bg-background/50 px-3">
@@ -258,7 +258,8 @@ export default function UserServices() {
         {/* Submit */}
         <Button
           type="submit"
-          className="w-full h-12 font-semibold text-sm rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-200 group"
+          className="w-full h-12 font-semibold text-sm rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 group animate-slide-up"
+          style={{ animationDelay: '0.35s', animationFillMode: 'both' }}
           disabled={submitting || !selectedService}
         >
           {submitting ? (
