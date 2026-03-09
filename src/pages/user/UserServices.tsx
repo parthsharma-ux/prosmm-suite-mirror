@@ -258,7 +258,8 @@ export default function UserServices() {
         {/* Submit */}
         <Button
           type="submit"
-          className="w-full h-12 font-semibold text-sm rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-200 group"
+          className="w-full h-12 font-semibold text-sm rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 group animate-slide-up"
+          style={{ animationDelay: '0.35s', animationFillMode: 'both' }}
           disabled={submitting || !selectedService}
         >
           {submitting ? (
