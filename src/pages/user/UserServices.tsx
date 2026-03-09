@@ -117,7 +117,7 @@ export default function UserServices() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden">
+          <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden animate-slide-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
             <CardContent className="p-4">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 block">Search</Label>
               <div className="relative">
