@@ -172,7 +172,7 @@ export default function UserServices() {
 
         {/* Selected Service Detail */}
         {service && (
-          <Card className="border-primary/20 shadow-md bg-gradient-to-br from-primary/[0.04] to-primary/[0.08] backdrop-blur-sm overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+          <Card className="border-primary/20 shadow-md bg-gradient-to-br from-primary/[0.04] to-primary/[0.08] backdrop-blur-sm overflow-hidden animate-enter transition-all duration-300">
             <CardContent className="p-4">
               <div className="flex items-start gap-3 min-w-0 w-full">
                 <div className="p-1.5 rounded-lg bg-primary/10 mt-0.5 shrink-0">
