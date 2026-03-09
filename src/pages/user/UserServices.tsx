@@ -134,7 +134,7 @@ export default function UserServices() {
         </div>
 
         {/* Service Selector */}
-        <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden">
+        <Card className="border-border/40 shadow-sm bg-card/60 backdrop-blur-sm overflow-hidden animate-slide-up" style={{ animationDelay: '0.15s', animationFillMode: 'both' }}>
           <CardContent className="p-4">
             <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-2 block">Service</Label>
             <Select value={selectedService || "__none__"} onValueChange={(v) => { const id = v === "__none__" ? "" : v; setSelectedService(id); const s = services.find((x) => x.id === id); if (s) setQuantity(s.min_quantity); }}>
