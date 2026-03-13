@@ -7,7 +7,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -36,12 +35,15 @@ export default function AdminSidebar() {
   const collapsed = state === "collapsed";
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="border-r border-border/40">
       <SidebarContent>
         <SidebarGroup>
           {!collapsed && (
-            <div className="px-3 mb-2">
-              <img src={logo} alt="7smmpanel" className="h-6" />
+            <div className="px-3 py-3 mb-1 border-b border-border/30">
+              <div className="flex items-center gap-2">
+                <img src={logo} alt="7smmpanel" className="h-6" />
+                <span className="text-sm font-bold tracking-wide text-foreground">Admin</span>
+              </div>
             </div>
           )}
           <SidebarGroupContent>
@@ -52,8 +54,8 @@ export default function AdminSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === "/admin"}
-                      className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
+                      className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors"
+                      activeClassName="bg-primary/10 text-primary font-semibold"
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>{item.title}</span>}
@@ -65,11 +67,11 @@ export default function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-2 space-y-1">
+      <SidebarFooter className="p-2 space-y-1 border-t border-border/30">
         <div className="flex items-center justify-center">
           <ThemeToggle />
         </div>
-        <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-muted-foreground" onClick={signOut}>
+        <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-muted-foreground hover:text-primary" onClick={signOut}>
           <LogOut className="h-4 w-4" />
           {!collapsed && <span>Sign Out</span>}
         </Button>

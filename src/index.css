@@ -2,86 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 220 20% 14%;
+    --background: 232 47% 13%;
+    --foreground: 210 40% 96%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 14%;
+    --card: 232 40% 18%;
+    --card-foreground: 210 40% 96%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 14%;
+    --popover: 232 40% 18%;
+    --popover-foreground: 210 40% 96%;
 
-    --primary: 220 65% 48%;
+    --primary: 0 78% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 20% 14%;
+    --secondary: 232 35% 22%;
+    --secondary-foreground: 210 40% 96%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 232 35% 22%;
+    --muted-foreground: 215 20% 60%;
 
-    --accent: 220 14% 93%;
-    --accent-foreground: 220 20% 14%;
+    --accent: 232 35% 25%;
+    --accent-foreground: 210 40% 96%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 72% 29%;
+    --success: 142 72% 42%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 220 65% 48%;
+    --border: 232 30% 25%;
+    --input: 232 30% 25%;
+    --ring: 0 78% 55%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 10% 36%;
-    --sidebar-primary: 220 65% 48%;
+    --sidebar-background: 232 47% 10%;
+    --sidebar-foreground: 215 20% 70%;
+    --sidebar-primary: 0 78% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 96%;
-    --sidebar-accent-foreground: 220 20% 14%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 220 65% 48%;
+    --sidebar-accent: 232 35% 18%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 232 30% 20%;
+    --sidebar-ring: 0 78% 55%;
 
-    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-sans: 'Open Sans', system-ui, -apple-system, sans-serif;
   }
 
   .dark {
-    --background: 220 20% 7%;
-    --foreground: 220 14% 96%;
-    --card: 220 20% 10%;
-    --card-foreground: 220 14% 96%;
-    --popover: 220 20% 10%;
-    --popover-foreground: 220 14% 96%;
-    --primary: 220 65% 55%;
+    --background: 232 47% 8%;
+    --foreground: 210 40% 96%;
+    --card: 232 40% 12%;
+    --card-foreground: 210 40% 96%;
+    --popover: 232 40% 12%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 0 78% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 20% 16%;
-    --secondary-foreground: 220 14% 96%;
-    --muted: 220 20% 16%;
-    --muted-foreground: 220 10% 56%;
-    --accent: 220 20% 16%;
-    --accent-foreground: 220 14% 96%;
+    --secondary: 232 35% 16%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 232 35% 16%;
+    --muted-foreground: 215 20% 55%;
+    --accent: 232 35% 18%;
+    --accent-foreground: 210 40% 96%;
     --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 20% 18%;
-    --input: 220 20% 18%;
-    --ring: 220 65% 55%;
-    --sidebar-background: 220 20% 10%;
-    --sidebar-foreground: 220 14% 80%;
-    --sidebar-primary: 220 65% 55%;
+    --border: 232 30% 18%;
+    --input: 232 30% 18%;
+    --ring: 0 78% 55%;
+    --sidebar-background: 232 47% 7%;
+    --sidebar-foreground: 215 20% 65%;
+    --sidebar-primary: 0 78% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 16%;
-    --sidebar-accent-foreground: 220 14% 96%;
-    --sidebar-border: 220 20% 18%;
-    --sidebar-ring: 220 65% 55%;
+    --sidebar-accent: 232 35% 14%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 232 30% 15%;
+    --sidebar-ring: 0 78% 55%;
   }
 }
 
@@ -134,4 +134,24 @@ html {
 /* Smooth focus transitions */
 input, select, textarea, button, a {
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Login/Register page gradient background */
+.auth-gradient-bg {
+  background: linear-gradient(135deg, hsl(232 47% 13%) 0%, hsl(250 40% 18%) 50%, hsl(232 47% 10%) 100%);
+}
+
+/* Wave divider */
+.wave-divider {
+  position: relative;
+}
+.wave-divider::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: hsl(var(--background));
+  clip-path: ellipse(55% 100% at 50% 100%);
 }
