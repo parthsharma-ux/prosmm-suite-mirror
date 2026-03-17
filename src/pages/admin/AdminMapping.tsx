@@ -56,89 +56,56 @@ export default function AdminMapping() {
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/sync-provider-services`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-          body: JSON.stringify({ provider_id: selectedProvider }),
-        }
+        { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ provider_id: selectedProvider }) }
       );
       const result = await res.json();
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        setProviderServices(result.services || []);
-        toast.success(`Fetched ${result.total} services from provider`);
-      }
-    } catch (e: any) {
-      toast.error(e.message || "Fetch failed");
-    } finally {
-      setSyncing(false);
-    }
+      if (result.error) toast.error(result.error);
+      else { setProviderServices(result.services || []); toast.success(`Fetched ${result.total} services from provider`); }
+    } catch (e: any) { toast.error(e.message || "Fetch failed"); }
+    finally { setSyncing(false); }
   };
 
   const mapService = async (providerServiceId: string) => {
     if (!selectedLocalService) { toast.error("Select a local service to map"); return; }
-    const { error } = await supabase.from("public_services").update({
-      provider_id: selectedProvider,
-      provider_service_id: providerServiceId,
-    }).eq("id", selectedLocalService);
-
-    if (error) {
-      toast.error(error.message);
-    } else {
+    const { error } = await supabase.from("public_services").update({ provider_id: selectedProvider, provider_service_id: providerServiceId }).eq("id", selectedLocalService);
+    if (error) toast.error(error.message);
+    else {
       toast.success(`Mapped service ID ${providerServiceId} successfully`);
       setMappingServiceId(null);
       setSelectedLocalService("");
-      // Refresh local services
       const { data } = await supabase.from("public_services").select("*").order("name");
       setLocalServices(data || []);
     }
   };
 
-  const getMappedLocalService = (providerServiceId: string) => {
-    return localServices.find(
-      (s) => s.provider_service_id === providerServiceId && s.provider_id === selectedProvider
-    );
-  };
-
+  const getMappedLocalService = (providerServiceId: string) => localServices.find((s) => s.provider_service_id === providerServiceId && s.provider_id === selectedProvider);
   const filteredProviderServices = providerServices.filter((s) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return s.name.toLowerCase().includes(q) || s.service_id.includes(searchQuery) || s.category.toLowerCase().includes(q);
   });
-
-  const unmappedLocalServices = localServices.filter(
-    (s) => !s.provider_service_id || !s.provider_id
-  );
+  const unmappedLocalServices = localServices.filter((s) => !s.provider_service_id || !s.provider_id);
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      <h2 className="text-xl font-bold tracking-tight">API Mapping</h2>
-      <p className="text-sm text-muted-foreground">
-        Fetch services from your provider API and map them to your local services for automated order forwarding.
-      </p>
+    <div className="space-y-6 animate-fade-in">
+      <div>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">API Mapping</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Map provider services to your local catalog</p>
+      </div>
 
-      <Card className="border-border/50">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-sm font-semibold">Select Provider & Fetch Services</CardTitle>
-        </CardHeader>
+      <Card className="border-border bg-card">
+        <CardHeader className="pb-4"><CardTitle className="text-sm font-semibold">Select Provider & Fetch Services</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-3 items-end">
-            <div className="flex-1 space-y-1.5">
+          <div className="flex gap-3 items-end flex-wrap">
+            <div className="flex-1 min-w-48">
               <Select value={selectedProvider} onValueChange={(v) => { setSelectedProvider(v); setProviderServices([]); }}>
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Select a provider" />
-                </SelectTrigger>
-                <SelectContent>
-                  {providers.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                  ))}
-                </SelectContent>
+                <SelectTrigger className="h-10"><SelectValue placeholder="Select a provider" /></SelectTrigger>
+                <SelectContent>{providers.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <Button onClick={fetchProviderServices} disabled={syncing || !selectedProvider} className="h-10">
+            <Button onClick={fetchProviderServices} disabled={syncing || !selectedProvider} className="h-10 font-semibold">
               {syncing ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <RefreshCw className="h-4 w-4 mr-1.5" />}
               Fetch Services
             </Button>
@@ -148,91 +115,80 @@ export default function AdminMapping() {
 
       {providerServices.length > 0 && (
         <>
-          <div className="flex items-center justify-between">
-            <Badge variant="secondary" className="text-xs">{providerServices.length} provider services</Badge>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <Badge variant="secondary" className="text-xs font-semibold">{providerServices.length} provider services</Badge>
             <div className="relative max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name, ID, category..." className="pl-9 h-9" />
             </div>
           </div>
 
-          <div className="rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30">
-                  <TableHead className="font-semibold">Service ID</TableHead>
-                  <TableHead className="font-semibold">Name</TableHead>
-                  <TableHead className="font-semibold">Category</TableHead>
-                  <TableHead className="font-semibold">Rate</TableHead>
-                  <TableHead className="font-semibold">Min/Max</TableHead>
-                  <TableHead className="font-semibold">Status</TableHead>
-                  <TableHead className="text-right font-semibold">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProviderServices.map((s) => {
-                  const mapped = getMappedLocalService(s.service_id);
-                  const isMapping = mappingServiceId === s.service_id;
-
-                  return (
-                    <TableRow key={s.service_id} className="group hover:bg-muted/20 transition-colors">
-                      <TableCell>
-                        <Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0 rounded bg-primary/10 text-primary border-0">
-                          #{s.service_id}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="min-w-0 max-w-64">
-                          <p className="font-semibold text-sm whitespace-normal break-words leading-tight">{s.name}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell><span className="text-xs text-muted-foreground">{s.category}</span></TableCell>
-                      <TableCell><span className="font-semibold text-sm">${s.rate}</span></TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{s.min} / {s.max}</TableCell>
-                      <TableCell>
-                        {mapped ? (
-                          <Badge className="bg-green-500/10 text-green-600 border-0 text-[10px]">
-                            <Check className="h-3 w-3 mr-1" /> Mapped → {mapped.name.slice(0, 20)}
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-[10px] text-muted-foreground">Unmapped</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {isMapping ? (
-                          <div className="flex items-center gap-2 justify-end">
-                            <Select value={selectedLocalService} onValueChange={setSelectedLocalService}>
-                              <SelectTrigger className="h-8 w-48 text-xs">
-                                <SelectValue placeholder="Select local service" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {unmappedLocalServices.map((ls) => (
-                                  <SelectItem key={ls.id} value={ls.id} className="text-xs">{ls.name}</SelectItem>
-                                ))}
-                                {localServices.filter(ls => ls.provider_service_id).map((ls) => (
-                                  <SelectItem key={ls.id} value={ls.id} className="text-xs text-muted-foreground">{ls.name} (remapped)</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Button size="sm" className="h-8 text-xs" onClick={() => mapService(s.service_id)} disabled={!selectedLocalService}>
-                              Save
-                            </Button>
-                            <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => { setMappingServiceId(null); setSelectedLocalService(""); }}>
-                              Cancel
-                            </Button>
+          <Card className="border-border bg-card overflow-hidden">
+            <div className="table-wrapper">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold text-xs">Service ID</TableHead>
+                    <TableHead className="font-semibold text-xs">Name</TableHead>
+                    <TableHead className="font-semibold text-xs">Category</TableHead>
+                    <TableHead className="font-semibold text-xs">Rate</TableHead>
+                    <TableHead className="font-semibold text-xs">Min/Max</TableHead>
+                    <TableHead className="font-semibold text-xs">Status</TableHead>
+                    <TableHead className="text-right font-semibold text-xs">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProviderServices.map((s) => {
+                    const mapped = getMappedLocalService(s.service_id);
+                    const isMapping = mappingServiceId === s.service_id;
+                    return (
+                      <TableRow key={s.service_id} className="hover:bg-muted/30 transition-colors">
+                        <TableCell>
+                          <Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0 rounded bg-primary/10 text-primary border-0">#{s.service_id}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="min-w-0 max-w-64">
+                            <p className="font-semibold text-sm whitespace-normal break-words leading-tight">{s.name}</p>
                           </div>
-                        ) : (
-                          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => { setMappingServiceId(s.service_id); setSelectedLocalService(mapped?.id || ""); }}>
-                            <Link2 className="h-3 w-3 mr-1" /> {mapped ? "Remap" : "Map"}
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                        </TableCell>
+                        <TableCell><span className="text-xs text-muted-foreground">{s.category}</span></TableCell>
+                        <TableCell><span className="font-semibold text-sm">${s.rate}</span></TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{s.min} / {s.max}</TableCell>
+                        <TableCell>
+                          {mapped ? (
+                            <Badge className="bg-success/10 text-success border-0 text-[10px]">
+                              <Check className="h-3 w-3 mr-1" /> Mapped
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-[10px] text-muted-foreground">Unmapped</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {isMapping ? (
+                            <div className="flex items-center gap-2 justify-end flex-wrap">
+                              <Select value={selectedLocalService} onValueChange={setSelectedLocalService}>
+                                <SelectTrigger className="h-8 w-44 text-xs"><SelectValue placeholder="Select service" /></SelectTrigger>
+                                <SelectContent>
+                                  {unmappedLocalServices.map((ls) => <SelectItem key={ls.id} value={ls.id} className="text-xs">{ls.name}</SelectItem>)}
+                                  {localServices.filter(ls => ls.provider_service_id).map((ls) => <SelectItem key={ls.id} value={ls.id} className="text-xs text-muted-foreground">{ls.name} (remap)</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                              <Button size="sm" className="h-8 text-xs" onClick={() => mapService(s.service_id)} disabled={!selectedLocalService}>Save</Button>
+                              <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => { setMappingServiceId(null); setSelectedLocalService(""); }}>Cancel</Button>
+                            </div>
+                          ) : (
+                            <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => { setMappingServiceId(s.service_id); setSelectedLocalService(mapped?.id || ""); }}>
+                              <Link2 className="h-3 w-3 mr-1" /> {mapped ? "Remap" : "Map"}
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
         </>
       )}
     </div>
