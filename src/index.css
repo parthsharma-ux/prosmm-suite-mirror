@@ -2,86 +2,101 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer base {
   :root {
-    --background: 232 47% 13%;
-    --foreground: 210 40% 96%;
+    --background: 220 20% 97%;
+    --foreground: 224 30% 14%;
 
-    --card: 232 40% 18%;
-    --card-foreground: 210 40% 96%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 30% 14%;
 
-    --popover: 232 40% 18%;
-    --popover-foreground: 210 40% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 30% 14%;
 
-    --primary: 0 78% 55%;
+    --primary: 220 90% 56%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 232 35% 22%;
-    --secondary-foreground: 210 40% 96%;
+    --secondary: 220 14% 93%;
+    --secondary-foreground: 224 30% 14%;
 
-    --muted: 232 35% 22%;
-    --muted-foreground: 215 20% 60%;
+    --muted: 220 14% 93%;
+    --muted-foreground: 220 10% 46%;
 
-    --accent: 232 35% 25%;
-    --accent-foreground: 210 40% 96%;
+    --accent: 220 14% 93%;
+    --accent-foreground: 224 30% 14%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 72% 42%;
+    --success: 152 60% 40%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 232 30% 25%;
-    --input: 232 30% 25%;
-    --ring: 0 78% 55%;
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 220 90% 56%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 232 47% 10%;
-    --sidebar-foreground: 215 20% 70%;
-    --sidebar-primary: 0 78% 55%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 10% 46%;
+    --sidebar-primary: 220 90% 56%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 232 35% 18%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 232 30% 20%;
-    --sidebar-ring: 0 78% 55%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 224 30% 14%;
+    --sidebar-border: 220 13% 92%;
+    --sidebar-ring: 220 90% 56%;
 
-    --font-sans: 'Open Sans', system-ui, -apple-system, sans-serif;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   .dark {
-    --background: 232 47% 8%;
-    --foreground: 210 40% 96%;
-    --card: 232 40% 12%;
-    --card-foreground: 210 40% 96%;
-    --popover: 232 40% 12%;
-    --popover-foreground: 210 40% 96%;
-    --primary: 0 78% 55%;
+    --background: 224 30% 10%;
+    --foreground: 210 20% 92%;
+
+    --card: 224 25% 13%;
+    --card-foreground: 210 20% 92%;
+
+    --popover: 224 25% 13%;
+    --popover-foreground: 210 20% 92%;
+
+    --primary: 220 90% 56%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 232 35% 16%;
-    --secondary-foreground: 210 40% 96%;
-    --muted: 232 35% 16%;
-    --muted-foreground: 215 20% 55%;
-    --accent: 232 35% 18%;
-    --accent-foreground: 210 40% 96%;
-    --destructive: 0 62% 40%;
+
+    --secondary: 224 20% 18%;
+    --secondary-foreground: 210 20% 92%;
+
+    --muted: 224 20% 18%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 224 20% 20%;
+    --accent-foreground: 210 20% 92%;
+
+    --destructive: 0 62% 45%;
     --destructive-foreground: 0 0% 100%;
-    --border: 232 30% 18%;
-    --input: 232 30% 18%;
-    --ring: 0 78% 55%;
-    --sidebar-background: 232 47% 7%;
-    --sidebar-foreground: 215 20% 65%;
-    --sidebar-primary: 0 78% 55%;
+
+    --success: 152 60% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 224 20% 20%;
+    --input: 224 20% 20%;
+    --ring: 220 90% 56%;
+
+    --sidebar-background: 224 30% 8%;
+    --sidebar-foreground: 220 10% 55%;
+    --sidebar-primary: 220 90% 56%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 232 35% 14%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 232 30% 15%;
-    --sidebar-ring: 0 78% 55%;
+    --sidebar-accent: 224 20% 14%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 224 20% 16%;
+    --sidebar-ring: 220 90% 56%;
   }
 }
 
@@ -94,22 +109,31 @@
   }
 }
 
-/* Smooth transitions globally */
-@layer utilities {
-  .transition-smooth {
-    @apply transition-all duration-200 ease-out;
-  }
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.35);
 }
 
-/* Smooth page transitions */
+/* Page transitions */
 main {
-  animation: fadeIn 0.2s ease-out;
+  animation: pageIn 0.2s ease-out;
 }
 
-@keyframes fadeIn {
+@keyframes pageIn {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(3px);
   }
   to {
     opacity: 1;
@@ -117,41 +141,23 @@ main {
   }
 }
 
-/* Smooth card hover effects */
-.card-hover {
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-}
-.card-hover:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px hsl(var(--foreground) / 0.06);
-}
-
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Smooth focus transitions */
+/* Focus transitions */
 input, select, textarea, button, a {
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
-/* Login/Register page gradient background */
+/* Auth page gradient background */
 .auth-gradient-bg {
-  background: linear-gradient(135deg, hsl(232 47% 13%) 0%, hsl(250 40% 18%) 50%, hsl(232 47% 10%) 100%);
+  background: linear-gradient(135deg, hsl(224 30% 10%) 0%, hsl(230 28% 14%) 50%, hsl(224 30% 8%) 100%);
 }
 
-/* Wave divider */
-.wave-divider {
-  position: relative;
-}
-.wave-divider::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 40px;
-  background: hsl(var(--background));
-  clip-path: ellipse(55% 100% at 50% 100%);
+/* Table wrapper for mobile scroll */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
