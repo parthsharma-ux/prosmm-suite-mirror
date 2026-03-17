@@ -5,7 +5,9 @@ import { Navigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
+import { UserPlus, Eye, EyeOff } from "lucide-react";
 import logo from "@/assets/logo-small.webp";
 
 export default function Register() {
@@ -14,6 +16,7 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
   if (loading) return null;
   if (user && role) return <Navigate to={role === "admin" ? "/admin" : "/dashboard/services"} replace />;
@@ -39,74 +42,70 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen auth-gradient-bg flex flex-col">
-      {/* Top Nav */}
-      <nav className="flex items-center justify-center gap-6 py-4 px-6 border-b border-border/30">
-        <div className="flex items-center gap-2 mr-6">
-          <img src={logo} alt="7smmpanel" className="h-7" />
-          <span className="text-lg font-bold tracking-wide text-foreground">7smmpanel</span>
+    <div className="min-h-screen flex items-center justify-center bg-background dark:auth-gradient-bg p-4">
+      <div className="w-full max-w-sm animate-fade-in">
+        <div className="flex justify-center mb-8">
+          <div className="flex items-center gap-2.5">
+            <img src={logo} alt="7smmpanel" className="h-8" />
+            <span className="text-lg font-bold text-foreground">7smmpanel</span>
+          </div>
         </div>
-        <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
-          Sign in
-        </Link>
-        <Link to="/register" className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1.5 bg-secondary/50 px-3 py-1.5 rounded-md">
-          Create Account
-        </Link>
-      </nav>
 
-      {/* Register Form */}
-      <div className="flex flex-col items-center justify-center flex-1 px-4 py-12">
-        <div className="w-full max-w-lg bg-card rounded-xl border border-border/50 shadow-2xl p-6 md:p-8">
-          <form onSubmit={handleRegister} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-foreground">Full Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                placeholder="John Doe"
-                className="h-11 bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-foreground">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="you@example.com"
-                className="h-11 bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-foreground">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
-                minLength={6}
-                className="h-11 bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full h-11 text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25 rounded-lg"
-              disabled={submitting}
-            >
-              {submitting ? "Creating account..." : "Sign up"}
-            </Button>
-          </form>
-          <p className="mt-5 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link to="/login" className="text-primary hover:underline font-semibold">Sign in</Link>
-          </p>
-        </div>
+        <Card className="border-border bg-card shadow-lg">
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-xl font-bold">Create account</CardTitle>
+            <CardDescription>Get started with 7smmpanel</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">Name</Label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" className="h-10" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">Email</Label>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required autoComplete="email" className="h-10" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">Password</Label>
+                <div className="relative">
+                  <Input
+                    type={showPass ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Min 6 characters"
+                    required
+                    minLength={6}
+                    autoComplete="new-password"
+                    className="h-10 pr-10"
+                  />
+                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                    {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <Button type="submit" className="w-full h-10 font-semibold" disabled={submitting}>
+                {submitting ? (
+                  <span className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                    Creating…
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    Sign Up
+                  </span>
+                )}
+              </Button>
+            </form>
+            <p className="text-center text-sm text-muted-foreground mt-5">
+              Already have an account?{" "}
+              <Link to="/login" className="text-primary font-medium hover:underline">
+                Sign In
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
