@@ -19,10 +19,8 @@ export default function UserAccount() {
         .from("orders")
         .select("amount, created_at")
         .eq("user_id", user!.id);
-
       const totalSpent = orders?.reduce((sum, o) => sum + Number(o.amount), 0) ?? 0;
       const totalOrders = orders?.length ?? 0;
-
       return { totalSpent, totalOrders };
     },
     enabled: !!user?.id,
@@ -43,76 +41,60 @@ export default function UserAccount() {
   });
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <h1 className="text-xl font-bold text-foreground">My Account</h1>
+    <div className="space-y-6 max-w-2xl mx-auto animate-fade-in">
+      <div>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">My Account</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Profile and transaction history</p>
+      </div>
 
       {/* Profile Info */}
-      <Card>
+      <Card className="border-border bg-card">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <User className="h-4 w-4" /> Profile
+          <CardTitle className="text-sm flex items-center gap-2 font-semibold">
+            <User className="h-4 w-4 text-primary" /> Profile
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Name</span>
-            <span className="font-medium text-foreground">{profile?.name || "—"}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Email</span>
-            <span className="font-medium text-foreground">{profile?.email}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Status</span>
-            <span className="font-medium text-foreground capitalize">{profile?.status}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Member since</span>
-            <span className="font-medium text-foreground">
-              {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "—"}
-            </span>
-          </div>
+          {[
+            { label: "Name", value: profile?.name || "—" },
+            { label: "Email", value: profile?.email },
+            { label: "Status", value: profile?.status, capitalize: true },
+            { label: "Member since", value: user?.created_at ? new Date(user.created_at).toLocaleDateString() : "—" },
+          ].map((item) => (
+            <div key={item.label} className="flex justify-between text-sm">
+              <span className="text-muted-foreground">{item.label}</span>
+              <span className={`font-medium text-foreground ${item.capitalize ? "capitalize" : ""}`}>{item.value}</span>
+            </div>
+          ))}
         </CardContent>
       </Card>
 
       {/* Spending Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <Wallet className="h-6 w-6 mx-auto text-primary mb-2" />
-            <p className="text-xs text-muted-foreground">Wallet Balance</p>
-            <p className="text-lg font-bold text-foreground">{formatWallet(profile?.wallet_balance ?? 0)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <ShoppingCart className="h-6 w-6 mx-auto text-primary mb-2" />
-            <p className="text-xs text-muted-foreground">Total Spent</p>
-            {isLoading ? (
-              <Skeleton className="h-7 w-20 mx-auto mt-1" />
-            ) : (
-              <p className="text-lg font-bold text-foreground">{format(stats?.totalSpent ?? 0)}</p>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 text-center">
-            <Calendar className="h-6 w-6 mx-auto text-primary mb-2" />
-            <p className="text-xs text-muted-foreground">Total Orders</p>
-            {isLoading ? (
-              <Skeleton className="h-7 w-12 mx-auto mt-1" />
-            ) : (
-              <p className="text-lg font-bold text-foreground">{stats?.totalOrders ?? 0}</p>
-            )}
-          </CardContent>
-        </Card>
+        {[
+          { icon: Wallet, label: "Wallet Balance", value: formatWallet(profile?.wallet_balance ?? 0), loading: false },
+          { icon: ShoppingCart, label: "Total Spent", value: format(stats?.totalSpent ?? 0), loading: isLoading },
+          { icon: Calendar, label: "Total Orders", value: String(stats?.totalOrders ?? 0), loading: isLoading },
+        ].map((item) => (
+          <Card key={item.label} className="border-border bg-card">
+            <CardContent className="pt-5 pb-4 text-center">
+              <item.icon className="h-5 w-5 mx-auto text-primary mb-2" />
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">{item.label}</p>
+              {item.loading ? (
+                <Skeleton className="h-7 w-20 mx-auto mt-1" />
+              ) : (
+                <p className="text-lg font-bold text-foreground mt-0.5">{item.value}</p>
+              )}
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Transaction History */}
-      <Card>
+      <Card className="border-border bg-card">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <History className="h-4 w-4" /> Transaction History
+          <CardTitle className="text-sm flex items-center gap-2 font-semibold">
+            <History className="h-4 w-4 text-primary" /> Transaction History
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -123,21 +105,21 @@ export default function UserAccount() {
           ) : !transactions?.length ? (
             <p className="text-sm text-muted-foreground text-center py-6">No transactions yet</p>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="table-wrapper">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead className="text-right">Date</TableHead>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="text-xs font-semibold">Type</TableHead>
+                    <TableHead className="text-xs font-semibold">Description</TableHead>
+                    <TableHead className="text-xs font-semibold text-right">Amount</TableHead>
+                    <TableHead className="text-xs font-semibold text-right">Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {transactions.map((tx) => {
                     const isCredit = tx.type === "deposit" || tx.type === "credit" || tx.type === "refund";
                     return (
-                      <TableRow key={tx.id}>
+                      <TableRow key={tx.id} className="hover:bg-muted/30 transition-colors">
                         <TableCell>
                           <Badge variant={isCredit ? "default" : "secondary"} className="gap-1 text-xs">
                             {isCredit ? <ArrowDownCircle className="h-3 w-3" /> : <ArrowUpCircle className="h-3 w-3" />}
@@ -145,7 +127,7 @@ export default function UserAccount() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">{tx.description || "—"}</TableCell>
-                        <TableCell className={`text-right text-sm font-medium ${isCredit ? "text-green-600 dark:text-green-400" : "text-foreground"}`}>
+                        <TableCell className={`text-right text-sm font-medium ${isCredit ? "text-success" : "text-foreground"}`}>
                           {isCredit ? "+" : "−"}{format(Math.abs(Number(tx.amount)))}
                         </TableCell>
                         <TableCell className="text-right text-xs text-muted-foreground whitespace-nowrap">

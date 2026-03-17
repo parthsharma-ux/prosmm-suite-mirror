@@ -85,21 +85,26 @@ export default function UserFunds() {
   const copyAddress = () => { navigator.clipboard.writeText(trc20Address); toast.success("Address copied!"); };
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6">
-      <h2 className="text-base font-semibold text-foreground">Add Funds</h2>
+    <div className="w-full max-w-2xl mx-auto space-y-6 animate-fade-in">
+      <div>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Add Funds</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Deposit funds to your wallet</p>
+      </div>
+
       {method === "upi" && upiQrUrl && (
-        <Card className="border-border bg-card/50 backdrop-blur-sm">
+        <Card className="border-border bg-card">
           <CardContent className="pt-6 flex flex-col items-center gap-4">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Wallet className="h-4 w-4" /><span>Scan QR to Pay via UPI</span></div>
-            <div className="rounded-xl border-2 border-primary/20 p-2 bg-background shadow-lg">
+            <div className="rounded-xl border-2 border-primary/20 p-2 bg-muted/30">
               <img src={upiQrUrl} alt="UPI QR Code" className="w-52 h-52 rounded-lg object-contain" />
             </div>
             <p className="text-xs text-muted-foreground">Pay using any UPI app and submit the UTR below</p>
           </CardContent>
         </Card>
       )}
+
       {method === "usdt" && trc20Address && (
-        <Card className="border-border bg-card/50 backdrop-blur-sm">
+        <Card className="border-border bg-card">
           <CardContent className="pt-6 space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><ArrowUpRight className="h-4 w-4" /><span>Send USDT (TRC20) to this address</span></div>
             <div className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border p-3">
@@ -110,50 +115,64 @@ export default function UserFunds() {
           </CardContent>
         </Card>
       )}
-      <Card className="shadow-sm border-border">
-        <CardHeader className="pb-4"><CardTitle className="text-sm">Submit Payment</CardTitle></CardHeader>
+
+      <Card className="border-border bg-card">
+        <CardHeader className="pb-4"><CardTitle className="text-sm font-semibold">Submit Payment</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Payment Method</Label>
+              <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Payment Method</Label>
               <Select value={method} onValueChange={setMethod}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-full h-10"><SelectValue /></SelectTrigger>
                 <SelectContent><SelectItem value="upi">UPI</SelectItem><SelectItem value="usdt">USDT (TRC20)</SelectItem></SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Amount ({method === "usdt" ? "$" : "₹"})</Label>
-              <Input type="number" step="0.01" min="1" value={amount || ""} onChange={(e) => setAmount(Number(e.target.value))} required className="w-full" />
+              <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Amount ({method === "usdt" ? "$" : "₹"})</Label>
+              <Input type="number" step="0.01" min="1" value={amount || ""} onChange={(e) => setAmount(Number(e.target.value))} required className="h-10" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">{method === "upi" ? "UTR Number" : "Transaction ID"}</Label>
-              <Input value={reference} onChange={(e) => setReference(e.target.value)} required placeholder="Enter reference" className="w-full" />
+              <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{method === "upi" ? "UTR Number" : "Transaction ID"}</Label>
+              <Input value={reference} onChange={(e) => setReference(e.target.value)} required placeholder="Enter reference" className="h-10" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Screenshot (optional)</Label>
-              <Input type="file" accept="image/*" onChange={(e) => setScreenshot(e.target.files?.[0] || null)} className="w-full" />
+              <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Screenshot (optional)</Label>
+              <Input type="file" accept="image/*" onChange={(e) => setScreenshot(e.target.files?.[0] || null)} className="h-10" />
             </div>
-            <Button type="submit" className="w-full" disabled={submitting}>{submitting ? "Submitting..." : "Submit Payment"}</Button>
+            <Button type="submit" className="w-full h-10 font-semibold" disabled={submitting}>{submitting ? "Submitting..." : "Submit Payment"}</Button>
           </form>
         </CardContent>
       </Card>
-      <h3 className="text-sm font-semibold text-foreground">Payment History</h3>
-      <div className="rounded-lg border border-border bg-card overflow-x-auto">
-        <Table>
-          <TableHeader><TableRow><TableHead>Method</TableHead><TableHead>Amount</TableHead><TableHead>Reference</TableHead><TableHead>Status</TableHead><TableHead>Date</TableHead></TableRow></TableHeader>
-          <TableBody>
-            {payments.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No payments yet</TableCell></TableRow>}
-            {payments.map((p) => (
-              <TableRow key={p.id}>
-                <TableCell className="uppercase font-medium text-xs">{p.method}</TableCell>
-                <TableCell>{p.method === "usdt" ? "$" : "₹"}{p.amount}</TableCell>
-                <TableCell className="font-mono text-xs max-w-32 truncate">{p.transaction_id || "—"}</TableCell>
-                <TableCell><Badge variant="outline" className={statusColors[p.status] || ""}>{p.status}</Badge></TableCell>
-                <TableCell className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+
+      <div>
+        <h2 className="text-sm font-semibold text-foreground mb-3">Payment History</h2>
+        <Card className="border-border bg-card overflow-hidden">
+          <div className="table-wrapper">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="text-xs font-semibold">Method</TableHead>
+                  <TableHead className="text-xs font-semibold">Amount</TableHead>
+                  <TableHead className="text-xs font-semibold">Reference</TableHead>
+                  <TableHead className="text-xs font-semibold">Status</TableHead>
+                  <TableHead className="text-xs font-semibold">Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {payments.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No payments yet</TableCell></TableRow>}
+                {payments.map((p) => (
+                  <TableRow key={p.id} className="hover:bg-muted/30 transition-colors">
+                    <TableCell className="uppercase font-medium text-xs">{p.method}</TableCell>
+                    <TableCell className="font-semibold">{p.method === "usdt" ? "$" : "₹"}{p.amount}</TableCell>
+                    <TableCell className="font-mono text-xs max-w-32 truncate">{p.transaction_id || "—"}</TableCell>
+                    <TableCell><Badge variant="outline" className={`text-[11px] font-semibold capitalize ${statusColors[p.status] || ""}`}>{p.status}</Badge></TableCell>
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{new Date(p.created_at).toLocaleDateString()}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -29,17 +29,8 @@ export default function AdminProviders() {
 
   useEffect(() => { fetchProviders(); }, []);
 
-  const openAdd = () => {
-    setEditing(null);
-    setForm({ name: "", api_url: "", api_key: "" });
-    setDialogOpen(true);
-  };
-
-  const openEdit = (p: Provider) => {
-    setEditing(p);
-    setForm({ name: p.name, api_url: p.api_url, api_key: p.api_key });
-    setDialogOpen(true);
-  };
+  const openAdd = () => { setEditing(null); setForm({ name: "", api_url: "", api_key: "" }); setDialogOpen(true); };
+  const openEdit = (p: Provider) => { setEditing(p); setForm({ name: p.name, api_url: p.api_url, api_key: p.api_key }); setDialogOpen(true); };
 
   const handleSave = async () => {
     if (!form.name || !form.api_url || !form.api_key) { toast.error("Fill all required fields"); return; }
@@ -87,45 +78,53 @@ export default function AdminProviders() {
   if (loading) return <div className="flex items-center justify-center h-64"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold tracking-tight">Providers</h2>
-        <Button size="sm" onClick={openAdd}><Plus className="h-4 w-4 mr-1" /> Add Provider</Button>
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Providers</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Manage API providers</p>
+        </div>
+        <Button size="sm" onClick={openAdd} className="font-semibold"><Plus className="h-4 w-4 mr-1" /> Add Provider</Button>
       </div>
-      <div className="rounded-lg border bg-card overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead><TableHead>API URL</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {providers.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No providers yet</TableCell></TableRow>}
-            {providers.map((p) => (
-              <TableRow key={p.id}>
-                <TableCell className="font-medium">{p.name}</TableCell>
-                <TableCell className="text-muted-foreground text-xs max-w-48 truncate">{p.api_url}</TableCell>
-                <TableCell><Switch checked={p.status === "active"} onCheckedChange={() => toggleStatus(p)} /></TableCell>
-                <TableCell className="text-right space-x-1">
-                  <Button variant="outline" size="sm" onClick={() => syncServices(p.id)} disabled={syncing === p.id}>
-                    {syncing === p.id ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <RefreshCw className="h-4 w-4 mr-1" />}Sync
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => deleteProvider(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                </TableCell>
+      <Card className="border-border bg-card overflow-hidden">
+        <div className="table-wrapper">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="font-semibold text-xs">Name</TableHead>
+                <TableHead className="font-semibold text-xs">API URL</TableHead>
+                <TableHead className="font-semibold text-xs">Status</TableHead>
+                <TableHead className="text-right font-semibold text-xs">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {providers.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No providers yet</TableCell></TableRow>}
+              {providers.map((p) => (
+                <TableRow key={p.id} className="hover:bg-muted/30 transition-colors">
+                  <TableCell className="font-medium">{p.name}</TableCell>
+                  <TableCell className="text-muted-foreground text-xs max-w-48 truncate">{p.api_url}</TableCell>
+                  <TableCell><Switch checked={p.status === "active"} onCheckedChange={() => toggleStatus(p)} /></TableCell>
+                  <TableCell className="text-right space-x-1">
+                    <Button variant="outline" size="sm" onClick={() => syncServices(p.id)} disabled={syncing === p.id} className="h-8 text-xs">
+                      {syncing === p.id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <RefreshCw className="h-3.5 w-3.5 mr-1" />}Sync
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => openEdit(p)} className="h-8 w-8"><Pencil className="h-3.5 w-3.5" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteProvider(p.id)} className="h-8 w-8"><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>{editing ? "Edit Provider" : "Add Provider"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="font-bold">{editing ? "Edit Provider" : "Add Provider"}</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2"><Label>Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. SMMPanel.co" /></div>
-            <div className="space-y-2"><Label>API URL *</Label><Input value={form.api_url} onChange={(e) => setForm({ ...form, api_url: e.target.value })} placeholder="https://example.com/api/v2" /></div>
-            <div className="space-y-2"><Label>API Key *</Label><Input value={form.api_key} onChange={(e) => setForm({ ...form, api_key: e.target.value })} type="password" placeholder="Your API key" /></div>
-            <Button onClick={handleSave} className="w-full">{editing ? "Update" : "Add"} Provider</Button>
+            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. SMMPanel.co" className="h-10" /></div>
+            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">API URL *</Label><Input value={form.api_url} onChange={(e) => setForm({ ...form, api_url: e.target.value })} placeholder="https://example.com/api/v2" className="h-10" /></div>
+            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">API Key *</Label><Input value={form.api_key} onChange={(e) => setForm({ ...form, api_key: e.target.value })} type="password" placeholder="Your API key" className="h-10" /></div>
+            <Button onClick={handleSave} className="w-full font-semibold">{editing ? "Update" : "Add"} Provider</Button>
           </div>
         </DialogContent>
       </Dialog>
