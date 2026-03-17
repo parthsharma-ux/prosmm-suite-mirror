@@ -10,7 +10,7 @@ interface StatCardProps {
 
 export default function StatCard({ title, value, icon: Icon, description }: StatCardProps) {
   return (
-    <Card className="border-border/40 shadow-lg bg-card hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5">
+    <Card className="border-border bg-card hover:shadow-md transition-all duration-200">
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div className="space-y-1.5">

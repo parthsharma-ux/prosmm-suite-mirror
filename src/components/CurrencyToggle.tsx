@@ -6,10 +6,10 @@ export default function CurrencyToggle() {
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="sm"
       onClick={() => setCurrency(currency === "USD" ? "INR" : "USD")}
-      className="h-7 px-2 text-xs font-semibold gap-1 border-border"
+      className="h-8 px-2.5 text-xs font-semibold gap-1 text-muted-foreground hover:text-foreground"
     >
       {currency === "USD" ? "$ USD" : "₹ INR"}
     </Button>
