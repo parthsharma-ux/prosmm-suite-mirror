@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Users, Mail, Wallet, Calendar, Shield, ShieldOff } from "lucide-react";
 import type { Tables } from "@/types/database";
 
 type Profile = Tables<"profiles">;
@@ -56,54 +55,67 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Users</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Manage user accounts and balances</p>
+      <div className="page-header">
+        <h1 className="page-title">Users</h1>
+        <p className="page-subtitle">Manage user accounts and balances</p>
       </div>
-      <Card className="border-border bg-card overflow-hidden">
-        <div className="table-wrapper">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="font-semibold text-xs">Name</TableHead>
-                <TableHead className="font-semibold text-xs">Email</TableHead>
-                <TableHead className="font-semibold text-xs">Balance</TableHead>
-                <TableHead className="font-semibold text-xs">Status</TableHead>
-                <TableHead className="font-semibold text-xs">Joined</TableHead>
-                <TableHead className="text-right font-semibold text-xs">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No users</TableCell></TableRow>}
-              {users.map((u) => (
-                <TableRow key={u.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-medium">{u.name || "—"}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs">{u.email}</TableCell>
-                  <TableCell className="font-semibold">${u.wallet_balance.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={`text-[11px] font-semibold capitalize ${u.status === "active" ? "bg-success/10 text-success border-success/30" : "bg-destructive/10 text-destructive border-destructive/30"}`}>
-                      {u.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{new Date(u.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-right space-x-1">
-                    <Button variant="outline" size="sm" onClick={() => toggleStatus(u)} className="h-7 text-xs">{u.status === "active" ? "Suspend" : "Activate"}</Button>
-                    <Button variant="outline" size="sm" onClick={() => openAdjust(u)} className="h-7 text-xs">Adjust</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+
+      {users.length === 0 ? (
+        <div className="ecom-card p-12 text-center">
+          <Users className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
+          <p className="text-muted-foreground font-medium">No users</p>
         </div>
-      </Card>
+      ) : (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+          {users.map((u) => (
+            <div key={u.id} className="ecom-card-interactive p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-bold text-primary">{(u.name || u.email)?.[0]?.toUpperCase()}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{u.name || "—"}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{u.email}</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className={`text-[10px] font-semibold capitalize ${u.status === "active" ? "bg-success/10 text-success border-success/30" : "bg-destructive/10 text-destructive border-destructive/30"}`}>
+                  {u.status}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/30 mb-3">
+                <div className="flex items-center gap-1.5 text-xs">
+                  <Wallet className="h-3.5 w-3.5 text-primary" />
+                  <span className="font-bold text-foreground">${u.wallet_balance.toFixed(2)}</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <Calendar className="h-3 w-3" />
+                  {new Date(u.created_at).toLocaleDateString()}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => toggleStatus(u)} className="flex-1 h-8 text-xs rounded-lg">
+                  {u.status === "active" ? <><ShieldOff className="h-3 w-3 mr-1" />Suspend</> : <><Shield className="h-3 w-3 mr-1" />Activate</>}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => openAdjust(u)} className="flex-1 h-8 text-xs rounded-lg">
+                  <Wallet className="h-3 w-3 mr-1" />Adjust
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <Dialog open={adjustDialog} onOpenChange={setAdjustDialog}>
         <DialogContent>
           <DialogHeader><DialogTitle className="font-bold">Adjust Wallet — {selectedUser?.name || selectedUser?.email}</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground">Current balance: <span className="font-semibold text-foreground">${selectedUser?.wallet_balance.toFixed(2)}</span></p>
           <div className="space-y-4">
-            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (use negative to deduct)</Label><Input type="number" step="0.01" value={adjustAmount} onChange={(e) => setAdjustAmount(Number(e.target.value))} className="h-10" /></div>
-            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reason</Label><Input value={adjustReason} onChange={(e) => setAdjustReason(e.target.value)} placeholder="Adjustment reason" className="h-10" /></div>
-            <Button onClick={handleAdjust} className="w-full font-semibold">Apply Adjustment</Button>
+            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (use negative to deduct)</Label><Input type="number" step="0.01" value={adjustAmount} onChange={(e) => setAdjustAmount(Number(e.target.value))} className="h-11 rounded-lg" /></div>
+            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reason</Label><Input value={adjustReason} onChange={(e) => setAdjustReason(e.target.value)} placeholder="Adjustment reason" className="h-11 rounded-lg" /></div>
+            <Button onClick={handleAdjust} className="w-full font-semibold rounded-xl">Apply Adjustment</Button>
           </div>
         </DialogContent>
       </Dialog>

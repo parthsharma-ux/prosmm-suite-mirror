@@ -3,11 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { TicketCheck, MessageSquare, Clock, CheckCircle, XCircle, Calendar, User } from "lucide-react";
 
 interface Ticket {
   id: string;
@@ -19,10 +18,10 @@ interface Ticket {
   created_at: string;
 }
 
-const statusColors: Record<string, string> = {
-  open: "bg-warning/10 text-warning border-warning/30",
-  answered: "bg-success/10 text-success border-success/30",
-  closed: "bg-muted text-muted-foreground border-border",
+const statusConfig: Record<string, { bg: string; dot: string }> = {
+  open: { bg: "bg-warning/10 text-warning border-warning/30", dot: "bg-warning" },
+  answered: { bg: "bg-success/10 text-success border-success/30", dot: "bg-success" },
+  closed: { bg: "bg-muted text-muted-foreground border-border", dot: "bg-muted-foreground" },
 };
 
 export default function AdminTickets() {
@@ -63,12 +62,12 @@ export default function AdminTickets() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Support Tickets</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage user support requests</p>
+        <div className="page-header mb-0">
+          <h1 className="page-title">Support Tickets</h1>
+          <p className="page-subtitle">Manage user support requests</p>
         </div>
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-32 h-9 text-xs"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-32 h-9 text-xs rounded-lg"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="open">Open</SelectItem>
@@ -78,36 +77,51 @@ export default function AdminTickets() {
         </Select>
       </div>
 
-      <Card className="border-border bg-card overflow-hidden">
-        <div className="table-wrapper">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="font-semibold text-xs">Subject</TableHead>
-                <TableHead className="font-semibold text-xs">User</TableHead>
-                <TableHead className="font-semibold text-xs">Status</TableHead>
-                <TableHead className="font-semibold text-xs">Date</TableHead>
-                <TableHead className="text-right font-semibold text-xs">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tickets.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No tickets</TableCell></TableRow>}
-              {tickets.map((t) => (
-                <TableRow key={t.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-medium text-sm">{t.subject}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground font-mono">{t.user_id.slice(0, 8)}</TableCell>
-                  <TableCell><Badge variant="outline" className={`capitalize text-[11px] font-semibold ${statusColors[t.status] || ""}`}>{t.status}</Badge></TableCell>
-                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{new Date(t.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-right space-x-1">
-                    <Button variant="outline" size="sm" onClick={() => { setSelected(t); setReply(t.admin_reply || ""); }} className="h-7 text-xs">Reply</Button>
-                    {t.status !== "closed" && <Button variant="ghost" size="sm" onClick={() => closeTicket(t.id)} className="h-7 text-xs">Close</Button>}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {tickets.length === 0 ? (
+        <div className="ecom-card p-12 text-center">
+          <TicketCheck className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
+          <p className="text-muted-foreground font-medium">No tickets</p>
         </div>
-      </Card>
+      ) : (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+          {tickets.map((t) => {
+            const cfg = statusConfig[t.status] || statusConfig.open;
+            return (
+              <div key={t.id} className="ecom-card-interactive p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <Badge variant="outline" className={`capitalize text-[11px] font-semibold ${cfg.bg}`}>
+                    <span className={`status-dot ${cfg.dot}`} />
+                    {t.status}
+                  </Badge>
+                  <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <Calendar className="h-3 w-3" />
+                    {new Date(t.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+
+                <h3 className="font-semibold text-sm text-foreground mb-1.5">{t.subject}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{t.message}</p>
+
+                <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-3">
+                  <User className="h-3 w-3" />
+                  <span className="font-mono">{t.user_id.slice(0, 8)}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => { setSelected(t); setReply(t.admin_reply || ""); }} className="flex-1 h-8 text-xs rounded-lg">
+                    <MessageSquare className="h-3 w-3 mr-1" /> Reply
+                  </Button>
+                  {t.status !== "closed" && (
+                    <Button variant="ghost" size="sm" onClick={() => closeTicket(t.id)} className="h-8 text-xs">
+                      <XCircle className="h-3 w-3 mr-1" /> Close
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
         <DialogContent>
@@ -115,13 +129,13 @@ export default function AdminTickets() {
           <div className="space-y-4 pt-2">
             <div>
               <p className="text-xs text-muted-foreground mb-1.5 font-medium">User message</p>
-              <p className="text-sm bg-muted/50 rounded-lg p-3 border border-border">{selected?.message}</p>
+              <p className="text-sm bg-muted/50 rounded-xl p-4 border border-border">{selected?.message}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1.5 font-medium">Your reply</p>
-              <Textarea value={reply} onChange={(e) => setReply(e.target.value)} rows={4} placeholder="Type your reply..." />
+              <Textarea value={reply} onChange={(e) => setReply(e.target.value)} rows={4} placeholder="Type your reply..." className="rounded-lg" />
             </div>
-            <Button onClick={handleReply} disabled={submitting} className="w-full font-semibold">
+            <Button onClick={handleReply} disabled={submitting} className="w-full font-semibold rounded-xl">
               {submitting ? "Sending..." : "Send Reply"}
             </Button>
           </div>

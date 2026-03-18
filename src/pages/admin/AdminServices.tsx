@@ -6,12 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Package, Zap } from "lucide-react";
 import type { Tables } from "@/types/database";
 
 type Service = Tables<"public_services">;
@@ -77,63 +75,65 @@ export default function AdminServices() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Public Services</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage your service catalog</p>
+        <div className="page-header mb-0">
+          <h1 className="page-title">Public Services</h1>
+          <p className="page-subtitle">Manage your service catalog</p>
         </div>
-        <Button size="sm" onClick={openAdd} className="font-semibold"><Plus className="h-4 w-4 mr-1" /> Add Service</Button>
+        <Button size="sm" onClick={openAdd} className="font-semibold rounded-lg shadow-lg shadow-primary/20">
+          <Plus className="h-4 w-4 mr-1" /> Add Service
+        </Button>
       </div>
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name or service ID..." className="pl-9 h-10" />
+        <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name or service ID..." className="pl-10 h-11 rounded-lg" />
       </div>
 
-      <Card className="border-border bg-card overflow-hidden">
-        <div className="table-wrapper">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="font-semibold text-xs">Service ID</TableHead>
-                <TableHead className="font-semibold text-xs">Name</TableHead>
-                <TableHead className="font-semibold text-xs">Category</TableHead>
-                <TableHead className="font-semibold text-xs">Provider</TableHead>
-                <TableHead className="font-semibold text-xs">Rate</TableHead>
-                <TableHead className="font-semibold text-xs">Min/Max</TableHead>
-                <TableHead className="font-semibold text-xs">Status</TableHead>
-                <TableHead className="text-right font-semibold text-xs">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredServices.length === 0 && <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No services</TableCell></TableRow>}
-              {filteredServices.map((s) => (
-                <TableRow key={s.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell>
-                    <Badge variant="secondary" className="text-[10px] font-bold px-1.5 py-0 rounded bg-primary/10 text-primary border-0">
-                      {s.provider_service_id ? `#${s.provider_service_id}` : "—"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="min-w-0 max-w-64">
-                      <p className="font-semibold text-sm whitespace-normal break-words leading-tight">{s.name}</p>
-                      {s.description && <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{s.description}</p>}
-                    </div>
-                  </TableCell>
-                  <TableCell><span className="font-medium text-xs">{getCategoryName(s.category_id)}</span></TableCell>
-                  <TableCell><span className="text-xs text-muted-foreground">{getProviderName(s.provider_id) || "—"}</span></TableCell>
-                  <TableCell><span className="font-semibold">${s.rate}</span></TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{s.min_quantity} / {s.max_quantity}</TableCell>
-                  <TableCell><Switch checked={s.status === "active"} onCheckedChange={() => toggle(s)} /></TableCell>
-                  <TableCell className="text-right space-x-1">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(s)} className="h-8 w-8"><Pencil className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => del(s.id)} className="h-8 w-8"><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {filteredServices.length === 0 ? (
+        <div className="ecom-card p-12 text-center">
+          <Package className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
+          <p className="text-muted-foreground font-medium">No services found</p>
         </div>
-      </Card>
+      ) : (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+          {filteredServices.map((s) => (
+            <div key={s.id} className="ecom-card-interactive p-5">
+              <div className="flex items-start justify-between mb-3">
+                <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border-0">
+                  #{s.provider_service_id || "N/A"}
+                </Badge>
+                <Switch checked={s.status === "active"} onCheckedChange={() => toggle(s)} />
+              </div>
+
+              <h3 className="font-semibold text-sm text-foreground leading-snug mb-1 line-clamp-2">{s.name}</h3>
+              {s.description && <p className="text-[11px] text-muted-foreground line-clamp-1 mb-2">{s.description}</p>}
+
+              <div className="flex items-center gap-3 text-xs text-muted-foreground mb-1">
+                <span className="bg-muted px-2 py-0.5 rounded text-[10px] font-medium">{getCategoryName(s.category_id)}</span>
+                {getProviderName(s.provider_id) && <span className="text-[10px]">{getProviderName(s.provider_id)}</span>}
+              </div>
+
+              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
+                <div className="flex items-center gap-1 text-xs">
+                  <Zap className="h-3 w-3 text-primary" />
+                  <span className="font-bold text-foreground">${s.rate}</span>
+                  <span className="text-muted-foreground">/1K</span>
+                </div>
+                <span className="text-[10px] text-muted-foreground">Min: {s.min_quantity} | Max: {s.max_quantity}</span>
+              </div>
+
+              <div className="flex items-center gap-1 mt-3">
+                <Button variant="outline" size="sm" onClick={() => openEdit(s)} className="flex-1 h-8 text-xs rounded-lg">
+                  <Pencil className="h-3 w-3 mr-1" /> Edit
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => del(s.id)} className="h-8 w-8 shrink-0">
+                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">
@@ -142,16 +142,16 @@ export default function AdminServices() {
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Category</Label>
               <Select value={form.category_id} onValueChange={(v) => setForm({ ...form, category_id: v })}>
-                <SelectTrigger className="h-10"><SelectValue placeholder="Select category" /></SelectTrigger>
+                <SelectTrigger className="h-11 rounded-lg"><SelectValue placeholder="Select category" /></SelectTrigger>
                 <SelectContent>{categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-10" /></div>
-            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
+            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-11 rounded-lg" /></div>
+            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} className="rounded-lg" /></div>
             <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rate ($)</Label><Input type="number" step="0.01" value={form.rate} onChange={(e) => setForm({ ...form, rate: Number(e.target.value) })} className="h-10" /></div>
-              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Min</Label><Input type="number" value={form.min_quantity} onChange={(e) => setForm({ ...form, min_quantity: Number(e.target.value) })} className="h-10" /></div>
-              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Max</Label><Input type="number" value={form.max_quantity} onChange={(e) => setForm({ ...form, max_quantity: Number(e.target.value) })} className="h-10" /></div>
+              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rate ($)</Label><Input type="number" step="0.01" value={form.rate} onChange={(e) => setForm({ ...form, rate: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
+              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Min</Label><Input type="number" value={form.min_quantity} onChange={(e) => setForm({ ...form, min_quantity: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
+              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Max</Label><Input type="number" value={form.max_quantity} onChange={(e) => setForm({ ...form, max_quantity: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
             </div>
             <div className="border-t border-border pt-4 space-y-4">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Provider Mapping</p>
@@ -159,7 +159,7 @@ export default function AdminServices() {
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Provider</Label>
                   <Select value={form.provider_id} onValueChange={(v) => setForm({ ...form, provider_id: v === "__none__" ? "" : v })}>
-                    <SelectTrigger className="h-10"><SelectValue placeholder="None" /></SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-lg"><SelectValue placeholder="None" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="__none__">None</SelectItem>
                       {providers.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
@@ -168,11 +168,11 @@ export default function AdminServices() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Provider Service ID</Label>
-                  <Input value={form.provider_service_id} onChange={(e) => setForm({ ...form, provider_service_id: e.target.value })} placeholder="e.g. 8221" className="h-10" />
+                  <Input value={form.provider_service_id} onChange={(e) => setForm({ ...form, provider_service_id: e.target.value })} placeholder="e.g. 8221" className="h-11 rounded-lg" />
                 </div>
               </div>
             </div>
-            <Button onClick={handleSave} className="w-full font-semibold">{editing ? "Update" : "Create"}</Button>
+            <Button onClick={handleSave} className="w-full font-semibold rounded-xl">{editing ? "Update" : "Create"}</Button>
           </div>
         </DialogContent>
       </Dialog>

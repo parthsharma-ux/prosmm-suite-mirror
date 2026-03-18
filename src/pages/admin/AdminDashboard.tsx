@@ -35,19 +35,19 @@ export default function AdminDashboard() {
   if (loading) return <div className="flex items-center justify-center h-64"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Overview of your panel activity</p>
+    <div className="space-y-8 animate-fade-in">
+      <div className="page-header">
+        <h1 className="page-title">Dashboard</h1>
+        <p className="page-subtitle">Overview of your panel activity</p>
       </div>
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Users" value={stats.totalUsers} icon={Users} />
         <StatCard title="Total Orders" value={stats.totalOrders} icon={ShoppingCart} />
         <StatCard title="Total Revenue" value={`$${stats.totalRevenue.toFixed(2)}`} icon={DollarSign} />
         <StatCard title="Active Services" value={stats.activeServices} icon={Package} />
         <StatCard title="Active Providers" value={stats.activeProviders} icon={Server} />
-        <StatCard title="Pending Payments" value={stats.pendingPayments} icon={CreditCard} />
-        <StatCard title="Failed Orders" value={stats.failedOrders} icon={AlertCircle} />
+        <StatCard title="Pending Payments" value={stats.pendingPayments} icon={CreditCard} description={stats.pendingPayments > 0 ? "Needs attention" : undefined} />
+        <StatCard title="Failed Orders" value={stats.failedOrders} icon={AlertCircle} description={stats.failedOrders > 0 ? "Review required" : undefined} />
       </div>
     </div>
   );
