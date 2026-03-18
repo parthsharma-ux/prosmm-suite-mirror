@@ -4,11 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, RefreshCw, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, RefreshCw, Loader2, Server, Globe, Key } from "lucide-react";
 import type { Tables } from "@/types/database";
 
 type Provider = Tables<"providers">;
@@ -80,51 +78,64 @@ export default function AdminProviders() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Providers</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage API providers</p>
+        <div className="page-header mb-0">
+          <h1 className="page-title">Providers</h1>
+          <p className="page-subtitle">Manage API providers</p>
         </div>
-        <Button size="sm" onClick={openAdd} className="font-semibold"><Plus className="h-4 w-4 mr-1" /> Add Provider</Button>
+        <Button size="sm" onClick={openAdd} className="font-semibold rounded-lg shadow-lg shadow-primary/20">
+          <Plus className="h-4 w-4 mr-1" /> Add Provider
+        </Button>
       </div>
-      <Card className="border-border bg-card overflow-hidden">
-        <div className="table-wrapper">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="font-semibold text-xs">Name</TableHead>
-                <TableHead className="font-semibold text-xs">API URL</TableHead>
-                <TableHead className="font-semibold text-xs">Status</TableHead>
-                <TableHead className="text-right font-semibold text-xs">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {providers.length === 0 && <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No providers yet</TableCell></TableRow>}
-              {providers.map((p) => (
-                <TableRow key={p.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-medium">{p.name}</TableCell>
-                  <TableCell className="text-muted-foreground text-xs max-w-48 truncate">{p.api_url}</TableCell>
-                  <TableCell><Switch checked={p.status === "active"} onCheckedChange={() => toggleStatus(p)} /></TableCell>
-                  <TableCell className="text-right space-x-1">
-                    <Button variant="outline" size="sm" onClick={() => syncServices(p.id)} disabled={syncing === p.id} className="h-8 text-xs">
-                      {syncing === p.id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <RefreshCw className="h-3.5 w-3.5 mr-1" />}Sync
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(p)} className="h-8 w-8"><Pencil className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteProvider(p.id)} className="h-8 w-8"><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+
+      {providers.length === 0 ? (
+        <div className="ecom-card p-12 text-center">
+          <Server className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
+          <p className="text-muted-foreground font-medium">No providers yet</p>
         </div>
-      </Card>
+      ) : (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+          {providers.map((p) => (
+            <div key={p.id} className="ecom-card-interactive p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Server className="h-4 w-4 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-sm text-foreground">{p.name}</h3>
+                </div>
+                <Switch checked={p.status === "active"} onCheckedChange={() => toggleStatus(p)} />
+              </div>
+
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-4 p-2 rounded-lg bg-muted/30">
+                <Globe className="h-3 w-3 shrink-0" />
+                <span className="truncate">{p.api_url}</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => syncServices(p.id)} disabled={syncing === p.id} className="flex-1 h-8 text-xs rounded-lg">
+                  {syncing === p.id ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <RefreshCw className="h-3.5 w-3.5 mr-1" />}
+                  Sync
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => openEdit(p)} className="h-8 w-8">
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => deleteProvider(p.id)} className="h-8 w-8">
+                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle className="font-bold">{editing ? "Edit Provider" : "Add Provider"}</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. SMMPanel.co" className="h-10" /></div>
-            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">API URL *</Label><Input value={form.api_url} onChange={(e) => setForm({ ...form, api_url: e.target.value })} placeholder="https://example.com/api/v2" className="h-10" /></div>
-            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">API Key *</Label><Input value={form.api_key} onChange={(e) => setForm({ ...form, api_key: e.target.value })} type="password" placeholder="Your API key" className="h-10" /></div>
-            <Button onClick={handleSave} className="w-full font-semibold">{editing ? "Update" : "Add"} Provider</Button>
+            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. SMMPanel.co" className="h-11 rounded-lg" /></div>
+            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">API URL *</Label><Input value={form.api_url} onChange={(e) => setForm({ ...form, api_url: e.target.value })} placeholder="https://example.com/api/v2" className="h-11 rounded-lg" /></div>
+            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">API Key *</Label><Input value={form.api_key} onChange={(e) => setForm({ ...form, api_key: e.target.value })} type="password" placeholder="Your API key" className="h-11 rounded-lg" /></div>
+            <Button onClick={handleSave} className="w-full font-semibold rounded-xl">{editing ? "Update" : "Add"} Provider</Button>
           </div>
         </DialogContent>
       </Dialog>
