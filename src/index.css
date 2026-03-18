@@ -36,11 +36,11 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 220 13% 90%;
-    --input: 220 13% 90%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
     --ring: 220 90% 56%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 10% 46%;
@@ -55,25 +55,25 @@
   }
 
   .dark {
-    --background: 224 30% 10%;
+    --background: 224 30% 7%;
     --foreground: 210 20% 92%;
 
-    --card: 224 25% 13%;
+    --card: 224 25% 11%;
     --card-foreground: 210 20% 92%;
 
-    --popover: 224 25% 13%;
+    --popover: 224 25% 11%;
     --popover-foreground: 210 20% 92%;
 
     --primary: 220 90% 56%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 224 20% 18%;
+    --secondary: 224 20% 16%;
     --secondary-foreground: 210 20% 92%;
 
-    --muted: 224 20% 18%;
+    --muted: 224 20% 16%;
     --muted-foreground: 220 10% 55%;
 
-    --accent: 224 20% 20%;
+    --accent: 224 20% 18%;
     --accent-foreground: 210 20% 92%;
 
     --destructive: 0 62% 45%;
@@ -85,17 +85,17 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 224 20% 20%;
-    --input: 224 20% 20%;
+    --border: 224 20% 18%;
+    --input: 224 20% 18%;
     --ring: 220 90% 56%;
 
-    --sidebar-background: 224 30% 8%;
+    --sidebar-background: 224 30% 6%;
     --sidebar-foreground: 220 10% 55%;
     --sidebar-primary: 220 90% 56%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 224 20% 14%;
+    --sidebar-accent: 224 20% 12%;
     --sidebar-accent-foreground: 210 20% 92%;
-    --sidebar-border: 224 20% 16%;
+    --sidebar-border: 224 20% 14%;
     --sidebar-ring: 220 90% 56%;
   }
 }
@@ -106,6 +106,40 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  /* E-commerce card styles */
+  .ecom-card {
+    @apply bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-300;
+  }
+  .ecom-card-interactive {
+    @apply bg-card border border-border rounded-xl shadow-sm hover:shadow-lg hover:border-primary/20 hover:-translate-y-0.5 transition-all duration-300;
+  }
+  .ecom-card-highlight {
+    @apply bg-card border-2 border-primary/20 rounded-xl shadow-md;
+  }
+
+  /* Page header */
+  .page-header {
+    @apply mb-6;
+  }
+  .page-title {
+    @apply text-2xl font-bold tracking-tight text-foreground;
+  }
+  .page-subtitle {
+    @apply text-sm text-muted-foreground mt-1;
+  }
+
+  /* Section card */
+  .section-card {
+    @apply bg-card border border-border rounded-xl p-6;
+  }
+
+  /* Status dot */
+  .status-dot {
+    @apply inline-block w-2 h-2 rounded-full mr-2;
   }
 }
 
@@ -127,13 +161,13 @@
 
 /* Page transitions */
 main {
-  animation: pageIn 0.2s ease-out;
+  animation: pageIn 0.25s ease-out;
 }
 
 @keyframes pageIn {
   from {
     opacity: 0;
-    transform: translateY(3px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
