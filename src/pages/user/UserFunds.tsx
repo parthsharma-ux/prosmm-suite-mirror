@@ -6,18 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Copy, Wallet, ArrowUpRight } from "lucide-react";
+import { Copy, Wallet, ArrowUpRight, CreditCard, Clock, CheckCircle, XCircle } from "lucide-react";
 import type { Tables } from "@/types/database";
 
 type PaymentRequest = Tables<"payment_requests">;
 
-const statusColors: Record<string, string> = {
-  pending: "bg-warning/10 text-warning border-warning/30",
-  approved: "bg-success/10 text-success border-success/30",
-  rejected: "bg-destructive/10 text-destructive border-destructive/30",
+const statusConfig: Record<string, { bg: string; icon: any; dot: string }> = {
+  pending: { bg: "bg-warning/10 text-warning border-warning/30", icon: Clock, dot: "bg-warning" },
+  approved: { bg: "bg-success/10 text-success border-success/30", icon: CheckCircle, dot: "bg-success" },
+  rejected: { bg: "bg-destructive/10 text-destructive border-destructive/30", icon: XCircle, dot: "bg-destructive" },
 };
 
 export default function UserFunds() {
@@ -85,94 +83,116 @@ export default function UserFunds() {
   const copyAddress = () => { navigator.clipboard.writeText(trc20Address); toast.success("Address copied!"); };
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Add Funds</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Deposit funds to your wallet</p>
+    <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
+      <div className="page-header">
+        <h1 className="page-title">Add Funds</h1>
+        <p className="page-subtitle">Deposit funds to your wallet</p>
       </div>
 
-      {method === "upi" && upiQrUrl && (
-        <Card className="border-border bg-card">
-          <CardContent className="pt-6 flex flex-col items-center gap-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Wallet className="h-4 w-4" /><span>Scan QR to Pay via UPI</span></div>
-            <div className="rounded-xl border-2 border-primary/20 p-2 bg-muted/30">
-              <img src={upiQrUrl} alt="UPI QR Code" className="w-52 h-52 rounded-lg object-contain" />
+      {/* Payment Method Info Cards */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+        <div
+          className={`ecom-card-interactive p-5 cursor-pointer ${method === "upi" ? "border-primary/40 shadow-md shadow-primary/10" : ""}`}
+          onClick={() => setMethod("upi")}
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2.5 rounded-xl bg-primary/10">
+              <CreditCard className="h-5 w-5 text-primary" />
             </div>
-            <p className="text-xs text-muted-foreground">Pay using any UPI app and submit the UTR below</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {method === "usdt" && trc20Address && (
-        <Card className="border-border bg-card">
-          <CardContent className="pt-6 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><ArrowUpRight className="h-4 w-4" /><span>Send USDT (TRC20) to this address</span></div>
-            <div className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border p-3">
-              <span className="text-xs font-mono text-foreground break-all flex-1">{trc20Address}</span>
-              <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={copyAddress}><Copy className="h-4 w-4" /></Button>
+            <div>
+              <h3 className="font-semibold text-sm text-foreground">UPI Payment</h3>
+              <p className="text-[11px] text-muted-foreground">Pay via any UPI app</p>
             </div>
-            <p className="text-xs text-muted-foreground">Send exact amount and submit the Transaction ID below</p>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card className="border-border bg-card">
-        <CardHeader className="pb-4"><CardTitle className="text-sm font-semibold">Submit Payment</CardTitle></CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Payment Method</Label>
-              <Select value={method} onValueChange={setMethod}>
-                <SelectTrigger className="w-full h-10"><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="upi">UPI</SelectItem><SelectItem value="usdt">USDT (TRC20)</SelectItem></SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Amount ({method === "usdt" ? "$" : "₹"})</Label>
-              <Input type="number" step="0.01" min="1" value={amount || ""} onChange={(e) => setAmount(Number(e.target.value))} required className="h-10" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{method === "upi" ? "UTR Number" : "Transaction ID"}</Label>
-              <Input value={reference} onChange={(e) => setReference(e.target.value)} required placeholder="Enter reference" className="h-10" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Screenshot (optional)</Label>
-              <Input type="file" accept="image/*" onChange={(e) => setScreenshot(e.target.files?.[0] || null)} className="h-10" />
-            </div>
-            <Button type="submit" className="w-full h-10 font-semibold" disabled={submitting}>{submitting ? "Submitting..." : "Submit Payment"}</Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <div>
-        <h2 className="text-sm font-semibold text-foreground mb-3">Payment History</h2>
-        <Card className="border-border bg-card overflow-hidden">
-          <div className="table-wrapper">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="text-xs font-semibold">Method</TableHead>
-                  <TableHead className="text-xs font-semibold">Amount</TableHead>
-                  <TableHead className="text-xs font-semibold">Reference</TableHead>
-                  <TableHead className="text-xs font-semibold">Status</TableHead>
-                  <TableHead className="text-xs font-semibold">Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payments.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No payments yet</TableCell></TableRow>}
-                {payments.map((p) => (
-                  <TableRow key={p.id} className="hover:bg-muted/30 transition-colors">
-                    <TableCell className="uppercase font-medium text-xs">{p.method}</TableCell>
-                    <TableCell className="font-semibold">{p.method === "usdt" ? "$" : "₹"}{p.amount}</TableCell>
-                    <TableCell className="font-mono text-xs max-w-32 truncate">{p.transaction_id || "—"}</TableCell>
-                    <TableCell><Badge variant="outline" className={`text-[11px] font-semibold capitalize ${statusColors[p.status] || ""}`}>{p.status}</Badge></TableCell>
-                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{new Date(p.created_at).toLocaleDateString()}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
           </div>
-        </Card>
+          {method === "upi" && upiQrUrl && (
+            <div className="flex justify-center mt-3">
+              <div className="rounded-xl border border-border p-2 bg-muted/30">
+                <img src={upiQrUrl} alt="UPI QR Code" className="w-36 h-36 rounded-lg object-contain" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div
+          className={`ecom-card-interactive p-5 cursor-pointer ${method === "usdt" ? "border-primary/40 shadow-md shadow-primary/10" : ""}`}
+          onClick={() => setMethod("usdt")}
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2.5 rounded-xl bg-success/10">
+              <ArrowUpRight className="h-5 w-5 text-success" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm text-foreground">USDT (TRC20)</h3>
+              <p className="text-[11px] text-muted-foreground">Send crypto directly</p>
+            </div>
+          </div>
+          {method === "usdt" && trc20Address && (
+            <div className="mt-3">
+              <div className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border p-3">
+                <span className="text-[10px] font-mono text-foreground break-all flex-1">{trc20Address}</span>
+                <Button variant="ghost" size="icon" className="shrink-0 h-7 w-7" onClick={(e) => { e.stopPropagation(); copyAddress(); }}>
+                  <Copy className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Submit Payment Form */}
+      <div className="ecom-card p-6">
+        <h3 className="font-semibold text-base text-foreground mb-5 flex items-center gap-2">
+          <Wallet className="h-4 w-4 text-primary" />
+          Submit Payment
+        </h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Amount ({method === "usdt" ? "$" : "₹"})</Label>
+            <Input type="number" step="0.01" min="1" value={amount || ""} onChange={(e) => setAmount(Number(e.target.value))} required className="h-11 rounded-lg" />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{method === "upi" ? "UTR Number" : "Transaction ID"}</Label>
+            <Input value={reference} onChange={(e) => setReference(e.target.value)} required placeholder="Enter reference" className="h-11 rounded-lg" />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Screenshot (optional)</Label>
+            <Input type="file" accept="image/*" onChange={(e) => setScreenshot(e.target.files?.[0] || null)} className="h-11 rounded-lg" />
+          </div>
+          <Button type="submit" className="w-full h-11 font-semibold rounded-xl shadow-lg shadow-primary/20" disabled={submitting}>
+            {submitting ? "Submitting..." : "Submit Payment"}
+          </Button>
+        </form>
+      </div>
+
+      {/* Payment History */}
+      <div>
+        <h2 className="font-semibold text-base text-foreground mb-4">Payment History</h2>
+        {payments.length === 0 ? (
+          <div className="ecom-card p-8 text-center">
+            <CreditCard className="h-10 w-10 mx-auto mb-2 text-muted-foreground/30" />
+            <p className="text-sm text-muted-foreground">No payments yet</p>
+          </div>
+        ) : (
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {payments.map((p) => {
+              const cfg = statusConfig[p.status] || statusConfig.pending;
+              return (
+                <div key={p.id} className="ecom-card p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold uppercase text-muted-foreground">{p.method}</span>
+                    <Badge variant="outline" className={`text-[11px] font-semibold capitalize ${cfg.bg}`}>
+                      <span className={`status-dot ${cfg.dot}`} />
+                      {p.status}
+                    </Badge>
+                  </div>
+                  <p className="text-xl font-bold text-foreground mb-1">{p.method === "usdt" ? "$" : "₹"}{p.amount}</p>
+                  <p className="text-[11px] font-mono text-muted-foreground truncate">{p.transaction_id || "—"}</p>
+                  <p className="text-[11px] text-muted-foreground mt-2">{new Date(p.created_at).toLocaleDateString()}</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
