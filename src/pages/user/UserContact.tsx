@@ -1,5 +1,6 @@
-import { MessageCircle, Send, Mail, Clock } from "lucide-react";
+import { MessageCircle, Send, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export default function UserContact() {
   return (
@@ -16,12 +17,7 @@ export default function UserContact() {
           </div>
           <h3 className="font-semibold text-foreground mb-1">Telegram</h3>
           <p className="text-xs text-muted-foreground mb-4">Chat with us instantly on Telegram</p>
-          <a
-            href="https://t.me/paymentsupportsmm"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-semibold text-primary hover:underline"
-          >
+          <a href="https://t.me/paymentsupportsmm" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline">
             @paymentsupportsmm
           </a>
         </div>
@@ -59,5 +55,3 @@ export default function UserContact() {
     </div>
   );
 }
-
-import { Badge } from "@/components/ui/badge";
