@@ -3,9 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, CreditCard, ArrowUpRight, DollarSign, TrendingUp } from "lucide-react";
 
 export default function AdminPaymentSettings() {
   const [upiQrUrl, setUpiQrUrl] = useState("");
@@ -65,73 +64,95 @@ export default function AdminPaymentSettings() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Payment Settings</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Configure payment methods and rates</p>
+      <div className="page-header">
+        <h1 className="page-title">Payment Settings</h1>
+        <p className="page-subtitle">Configure payment methods and rates</p>
       </div>
-      <div className="grid gap-5 md:grid-cols-2">
-        <Card className="border-border bg-card">
-          <CardHeader><CardTitle className="text-sm font-semibold">UPI QR Code</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
+
+      <div className="grid gap-5 grid-cols-1 md:grid-cols-2">
+        <div className="ecom-card p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="p-2.5 rounded-xl bg-primary/10">
+              <CreditCard className="h-5 w-5 text-primary" />
+            </div>
+            <h3 className="font-semibold text-foreground">UPI QR Code</h3>
+          </div>
+          <div className="space-y-4">
             {upiQrUrl && (
               <div className="w-full flex justify-center">
-                <img src={upiQrUrl} alt="UPI QR" className="max-w-44 rounded-lg border border-border" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                <img src={upiQrUrl} alt="UPI QR" className="max-w-44 rounded-xl border border-border" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
               </div>
             )}
             <div className="space-y-2">
               <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Upload QR Image</Label>
               <div className="flex gap-2">
-                <Input type="file" accept="image/*" onChange={handleQrUpload} disabled={uploading} className="flex-1 h-10" />
-                {uploading && <Loader2 className="h-4 w-4 animate-spin mt-2.5" />}
+                <Input type="file" accept="image/*" onChange={handleQrUpload} disabled={uploading} className="flex-1 h-11 rounded-lg" />
+                {uploading && <Loader2 className="h-4 w-4 animate-spin mt-3" />}
               </div>
             </div>
             <div className="space-y-2">
               <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Or paste direct image URL</Label>
-              <Input value={upiQrUrl} onChange={(e) => setUpiQrUrl(e.target.value)} placeholder="https://example.com/qr.png" className="h-10" />
+              <Input value={upiQrUrl} onChange={(e) => setUpiQrUrl(e.target.value)} placeholder="https://example.com/qr.png" className="h-11 rounded-lg" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="border-border bg-card">
-          <CardHeader><CardTitle className="text-sm font-semibold">USDT TRC20 Address</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
+        <div className="ecom-card p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="p-2.5 rounded-xl bg-success/10">
+              <ArrowUpRight className="h-5 w-5 text-success" />
+            </div>
+            <h3 className="font-semibold text-foreground">USDT TRC20 Address</h3>
+          </div>
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Wallet Address</Label>
-              <Input value={trc20Address} onChange={(e) => setTrc20Address(e.target.value)} placeholder="T..." className="font-mono text-xs h-10" />
+              <Input value={trc20Address} onChange={(e) => setTrc20Address(e.target.value)} placeholder="T..." className="font-mono text-xs h-11 rounded-lg" />
             </div>
             {trc20Address && (
-              <div className="rounded-md bg-muted p-3 text-xs font-mono text-muted-foreground break-all">{trc20Address}</div>
+              <div className="rounded-lg bg-muted/50 p-3 text-xs font-mono text-muted-foreground break-all border border-border">{trc20Address}</div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="border-border bg-card">
-          <CardHeader><CardTitle className="text-sm font-semibold">Panel Rate (Service Pricing)</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
+        <div className="ecom-card p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="p-2.5 rounded-xl bg-warning/10">
+              <DollarSign className="h-5 w-5 text-warning" />
+            </div>
+            <h3 className="font-semibold text-foreground">Panel Rate (Service Pricing)</h3>
+          </div>
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">1 USD = ? INR</Label>
-              <Input type="number" step="0.01" value={panelRate} onChange={(e) => setPanelRate(e.target.value)} placeholder="110" className="h-10" />
+              <Input type="number" step="0.01" value={panelRate} onChange={(e) => setPanelRate(e.target.value)} placeholder="110" className="h-11 rounded-lg" />
             </div>
-            <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
+            <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground border border-border">
               Example: $1.00 = ₹{(1 * parseFloat(panelRate || "0")).toFixed(2)}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="border-border bg-card">
-          <CardHeader><CardTitle className="text-sm font-semibold">Market Rate (Deposits)</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
+        <div className="ecom-card p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="p-2.5 rounded-xl bg-primary/10">
+              <TrendingUp className="h-5 w-5 text-primary" />
+            </div>
+            <h3 className="font-semibold text-foreground">Market Rate (Deposits)</h3>
+          </div>
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">1 USDT = ? INR</Label>
-              <Input type="number" step="0.01" value={marketRate} onChange={(e) => setMarketRate(e.target.value)} placeholder="93" className="h-10" />
+              <Input type="number" step="0.01" value={marketRate} onChange={(e) => setMarketRate(e.target.value)} placeholder="93" className="h-11 rounded-lg" />
             </div>
-            <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
+            <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground border border-border">
               Example: 1 USDT = ₹{parseFloat(marketRate || "0").toFixed(2)}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
-      <Button onClick={handleSave} disabled={saving} className="gap-2 font-semibold">
+
+      <Button onClick={handleSave} disabled={saving} className="gap-2 font-semibold rounded-xl shadow-lg shadow-primary/20">
         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
         Save Settings
       </Button>
