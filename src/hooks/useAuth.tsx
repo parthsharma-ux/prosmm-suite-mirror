@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: "admin" | "user" | null;
-  profile: { name: string; email: string; wallet_balance: number; status: string } | null;
+  profile: { name: string; email: string; wallet_balance: number; status: string; wallet_currency: string | null } | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }
