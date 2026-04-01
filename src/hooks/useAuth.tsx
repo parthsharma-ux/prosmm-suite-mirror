@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: "admin" | "user" | null;
-  profile: { name: string; email: string; wallet_balance: number; status: string } | null;
+  profile: { name: string; email: string; wallet_balance: number; status: string; wallet_currency: string | null } | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserData = async (userId: string) => {
     const [rolesRes, profileRes] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("profiles").select("name, email, wallet_balance, status").eq("user_id", userId).single(),
+      supabase.from("profiles").select("name, email, wallet_balance, status, wallet_currency").eq("user_id", userId).single() as any,
     ]);
     if (rolesRes.data && rolesRes.data.length > 0) {
       const hasAdmin = rolesRes.data.some((r) => r.role === "admin");

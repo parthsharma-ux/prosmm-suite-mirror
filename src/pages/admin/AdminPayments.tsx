@@ -29,6 +29,7 @@ export default function AdminPayments() {
   const approve = async (p: PaymentRequest) => {
     if (!confirm("Approve this payment?")) return;
     await supabase.from("payment_requests").update({ status: "approved" as const }).eq("id", p.id);
+
     let creditAmountUSD = p.amount;
     if (p.method === "upi") {
       const { data: rateData } = await supabase.from("payment_settings").select("details").eq("method", "market_rate").maybeSingle();
@@ -40,10 +41,22 @@ export default function AdminPayments() {
       }
       creditAmountUSD = p.amount / rate;
     }
-    const { data: profile } = await supabase.from("profiles").select("wallet_balance").eq("user_id", p.user_id).single();
+
+    const { data: profile } = await supabase.from("profiles").select("wallet_balance, wallet_currency").eq("user_id", p.user_id).single() as any;
     if (profile) {
-      await supabase.from("profiles").update({ wallet_balance: profile.wallet_balance + creditAmountUSD }).eq("user_id", p.user_id);
-      await supabase.from("transactions").insert({ user_id: p.user_id, type: "credit" as const, amount: creditAmountUSD, description: `Payment via ${p.method} - ${p.transaction_id || ''} (${p.method === 'usdt' ? '$' + p.amount : '₹' + p.amount})` });
+      // Lock currency on first approved deposit
+      const newCurrency = (profile as any).wallet_currency || (p.method === "upi" ? "INR" : "USDT");
+      await (supabase.from("profiles") as any).update({
+        wallet_balance: profile.wallet_balance + creditAmountUSD,
+        wallet_currency: newCurrency,
+      }).eq("user_id", p.user_id);
+
+      await supabase.from("transactions").insert({
+        user_id: p.user_id,
+        type: "credit" as const,
+        amount: creditAmountUSD,
+        description: `Payment via ${p.method} - ${p.transaction_id || ''} (${p.method === 'usdt' ? '$' + p.amount : '₹' + p.amount})`,
+      });
     }
     toast.success("Payment approved & wallet credited");
     fetchPayments();

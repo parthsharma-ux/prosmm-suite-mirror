@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Copy, Wallet, ArrowUpRight, CreditCard, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Copy, Wallet, ArrowUpRight, CreditCard, Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import type { Tables } from "@/types/database";
 
 type PaymentRequest = Tables<"payment_requests">;
@@ -19,8 +18,9 @@ const statusConfig: Record<string, { bg: string; icon: any; dot: string }> = {
 };
 
 export default function UserFunds() {
-  const { user } = useAuth();
-  const [method, setMethod] = useState<string>("upi");
+  const { user, profile } = useAuth();
+  const walletCurrency = (profile as any)?.wallet_currency as string | null;
+  const [method, setMethod] = useState<string>("");
   const [amount, setAmount] = useState(0);
   const [reference, setReference] = useState("");
   const [screenshot, setScreenshot] = useState<File | null>(null);
@@ -29,7 +29,13 @@ export default function UserFunds() {
   const [loading, setLoading] = useState(true);
   const [upiQrUrl, setUpiQrUrl] = useState("");
   const [trc20Address, setTrc20Address] = useState("");
-  const [marketRate, setMarketRate] = useState(93);
+
+  // If currency is locked, force method
+  useEffect(() => {
+    if (walletCurrency === "INR") setMethod("upi");
+    else if (walletCurrency === "USDT") setMethod("usdt");
+    else if (!method) setMethod("upi");
+  }, [walletCurrency]);
 
   const fetchPayments = () => {
     if (!user) return;
@@ -47,10 +53,6 @@ export default function UserFunds() {
           const details = row.details as Record<string, string> || {};
           if (row.method === "upi") setUpiQrUrl(details.qr_url || "");
           if (row.method === "usdt") setTrc20Address(details.address || "");
-          if (row.method === "market_rate") {
-            const rate = parseFloat(details.rate);
-            if (!isNaN(rate) && rate > 0) setMarketRate(rate);
-          }
         }
       }
     });
@@ -59,6 +61,17 @@ export default function UserFunds() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || amount <= 0 || !reference.trim()) { toast.error("Fill all fields"); return; }
+
+    // Prevent mixed currency deposits
+    if (walletCurrency === "INR" && method === "usdt") {
+      toast.error("Your wallet is locked to INR. You cannot deposit USDT.");
+      return;
+    }
+    if (walletCurrency === "USDT" && method === "upi") {
+      toast.error("Your wallet is locked to USDT. You cannot deposit INR.");
+      return;
+    }
+
     setSubmitting(true);
     let screenshotUrl: string | null = null;
     if (screenshot) {
@@ -82,6 +95,9 @@ export default function UserFunds() {
 
   const copyAddress = () => { navigator.clipboard.writeText(trc20Address); toast.success("Address copied!"); };
 
+  const showUpi = !walletCurrency || walletCurrency === "INR";
+  const showUsdt = !walletCurrency || walletCurrency === "USDT";
+
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="page-header">
@@ -89,54 +105,73 @@ export default function UserFunds() {
         <p className="page-subtitle">Deposit funds to your wallet</p>
       </div>
 
-      {/* Payment Method Info Cards */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-        <div
-          className={`ecom-card-interactive p-5 cursor-pointer ${method === "upi" ? "border-primary/40 shadow-md shadow-primary/10" : ""}`}
-          onClick={() => setMethod("upi")}
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2.5 rounded-xl bg-primary/10">
-              <CreditCard className="h-5 w-5 text-primary" />
-            </div>
+      {/* Currency lock warning for first-time users */}
+      {!walletCurrency && (
+        <div className="ecom-card p-4 border-warning/40 bg-warning/5">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-sm text-foreground">UPI Payment</h3>
-              <p className="text-[11px] text-muted-foreground">Pay via any UPI app</p>
+              <p className="text-sm font-semibold text-foreground">Important: Currency Lock</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Your wallet currency will be locked after your first approved deposit. If you deposit via UPI, your wallet will be in INR. If you deposit USDT, your wallet will be in USDT. You cannot change this later.
+              </p>
             </div>
           </div>
-          {method === "upi" && upiQrUrl && (
-            <div className="flex justify-center mt-3">
-              <div className="rounded-xl border border-border p-2 bg-muted/30">
-                <img src={upiQrUrl} alt="UPI QR Code" className="w-36 h-36 rounded-lg object-contain" />
-              </div>
-            </div>
-          )}
         </div>
+      )}
 
-        <div
-          className={`ecom-card-interactive p-5 cursor-pointer ${method === "usdt" ? "border-primary/40 shadow-md shadow-primary/10" : ""}`}
-          onClick={() => setMethod("usdt")}
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2.5 rounded-xl bg-success/10">
-              <ArrowUpRight className="h-5 w-5 text-success" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm text-foreground">USDT (TRC20)</h3>
-              <p className="text-[11px] text-muted-foreground">Send crypto directly</p>
-            </div>
-          </div>
-          {method === "usdt" && trc20Address && (
-            <div className="mt-3">
-              <div className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border p-3">
-                <span className="text-[10px] font-mono text-foreground break-all flex-1">{trc20Address}</span>
-                <Button variant="ghost" size="icon" className="shrink-0 h-7 w-7" onClick={(e) => { e.stopPropagation(); copyAddress(); }}>
-                  <Copy className="h-3.5 w-3.5" />
-                </Button>
+      {/* Payment Method Info Cards */}
+      <div className={`grid gap-4 grid-cols-1 ${showUpi && showUsdt ? "sm:grid-cols-2" : ""}`}>
+        {showUpi && (
+          <div
+            className={`ecom-card-interactive p-5 cursor-pointer ${method === "upi" ? "border-primary/40 shadow-md shadow-primary/10" : ""}`}
+            onClick={() => !walletCurrency && setMethod("upi")}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 rounded-xl bg-primary/10">
+                <CreditCard className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm text-foreground">UPI Payment</h3>
+                <p className="text-[11px] text-muted-foreground">Pay via any UPI app (INR)</p>
               </div>
             </div>
-          )}
-        </div>
+            {method === "upi" && upiQrUrl && (
+              <div className="flex justify-center mt-3">
+                <div className="rounded-xl border border-border p-2 bg-muted/30">
+                  <img src={upiQrUrl} alt="UPI QR Code" className="w-36 h-36 rounded-lg object-contain" />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {showUsdt && (
+          <div
+            className={`ecom-card-interactive p-5 cursor-pointer ${method === "usdt" ? "border-primary/40 shadow-md shadow-primary/10" : ""}`}
+            onClick={() => !walletCurrency && setMethod("usdt")}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 rounded-xl bg-success/10">
+                <ArrowUpRight className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm text-foreground">USDT (TRC20)</h3>
+                <p className="text-[11px] text-muted-foreground">Send crypto directly (USDT)</p>
+              </div>
+            </div>
+            {method === "usdt" && trc20Address && (
+              <div className="mt-3">
+                <div className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border p-3">
+                  <span className="text-[10px] font-mono text-foreground break-all flex-1">{trc20Address}</span>
+                  <Button variant="ghost" size="icon" className="shrink-0 h-7 w-7" onClick={(e) => { e.stopPropagation(); copyAddress(); }}>
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Submit Payment Form */}

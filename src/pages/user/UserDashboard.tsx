@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function UserDashboard() {
   const { user, profile } = useAuth();
-  const { formatWallet } = useCurrency();
+  const { formatWallet, marketRate } = useCurrency();
   const navigate = useNavigate();
   const [stats, setStats] = useState({ total: 0, active: 0, completed: 0 });
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,13 @@ export default function UserDashboard() {
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Wallet Balance" value={formatWallet(profile?.wallet_balance ?? 0)} icon={Wallet} />
+        <StatCard title="Wallet Balance" value={
+          profile?.wallet_currency === "INR"
+            ? `₹${((profile?.wallet_balance ?? 0) * (marketRate || 93)).toFixed(2)}`
+            : profile?.wallet_currency === "USDT"
+              ? `$${(profile?.wallet_balance ?? 0).toFixed(2)}`
+              : formatWallet(profile?.wallet_balance ?? 0)
+        } icon={Wallet} />
         <StatCard title="Total Orders" value={stats.total} icon={ShoppingCart} />
         <StatCard title="Active Orders" value={stats.active} icon={Clock} />
         <StatCard title="Completed" value={stats.completed} icon={CheckCircle} />
