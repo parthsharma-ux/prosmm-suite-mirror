@@ -67,16 +67,49 @@ Deno.serve(async (req) => {
       });
     }
 
-    const amount = (service.rate / 1000) * quantity;
-
-    // Check wallet balance
+    // Get user profile to determine wallet currency
     const { data: profile } = await adminClient
       .from("profiles")
-      .select("wallet_balance")
+      .select("wallet_balance, wallet_currency")
       .eq("user_id", user.id)
       .single();
 
-    if (!profile || profile.wallet_balance < amount) {
+    if (!profile) {
+      return new Response(JSON.stringify({ error: "Profile not found" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const walletCurrency = profile.wallet_currency;
+
+    // Determine rate based on user's wallet currency
+    let rate: number;
+    if (walletCurrency === "INR") {
+      rate = Number(service.rate_inr || 0);
+      if (rate <= 0) {
+        return new Response(JSON.stringify({ error: "This service does not have INR pricing configured" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else if (walletCurrency === "USDT") {
+      rate = Number(service.rate_usdt || 0);
+      if (rate <= 0) {
+        return new Response(JSON.stringify({ error: "This service does not have USDT pricing configured" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else {
+      // No currency locked yet - use legacy USD rate
+      rate = Number(service.rate || 0);
+    }
+
+    const amount = (rate / 1000) * quantity;
+
+    // Check wallet balance
+    if (profile.wallet_balance < amount) {
       return new Response(JSON.stringify({ error: "Insufficient balance" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -101,7 +134,6 @@ Deno.serve(async (req) => {
     let providerOrderId: string | null = null;
 
     if (service.provider_id && service.provider_service_id) {
-      // Get provider details
       const { data: provider } = await adminClient
         .from("providers")
         .select("*")
@@ -130,7 +162,6 @@ Deno.serve(async (req) => {
           }
         } catch (e) {
           console.error("Provider API error:", e);
-          // Order still created locally even if provider fails
         }
       }
     }

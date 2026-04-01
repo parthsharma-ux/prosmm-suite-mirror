@@ -23,7 +23,7 @@ export default function AdminServices() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
-  const [form, setForm] = useState({ category_id: "", name: "", description: "", rate: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" });
+  const [form, setForm] = useState({ category_id: "", name: "", description: "", rate: 0, rate_inr: 0, rate_usdt: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" });
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
@@ -40,14 +40,25 @@ export default function AdminServices() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const openAdd = () => { setEditing(null); setForm({ category_id: "", name: "", description: "", rate: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" }); setDialogOpen(true); };
-  const openEdit = (s: Service) => { setEditing(s); setForm({ category_id: s.category_id || "", name: s.name, description: s.description || "", rate: Number(s.rate), min_quantity: s.min_quantity, max_quantity: s.max_quantity, provider_id: s.provider_id || "", provider_service_id: s.provider_service_id || "" }); setDialogOpen(true); };
+  const openAdd = () => { setEditing(null); setForm({ category_id: "", name: "", description: "", rate: 0, rate_inr: 0, rate_usdt: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" }); setDialogOpen(true); };
+  const openEdit = (s: Service) => {
+    setEditing(s);
+    setForm({
+      category_id: s.category_id || "", name: s.name, description: s.description || "",
+      rate: Number(s.rate), rate_inr: Number((s as any).rate_inr || 0), rate_usdt: Number((s as any).rate_usdt || 0),
+      min_quantity: s.min_quantity, max_quantity: s.max_quantity,
+      provider_id: s.provider_id || "", provider_service_id: s.provider_service_id || ""
+    });
+    setDialogOpen(true);
+  };
 
   const handleSave = async () => {
     if (!form.name) { toast.error("Name required"); return; }
-    const payload = {
+    if (form.rate_inr <= 0 || form.rate_usdt <= 0) { toast.error("Both INR and USDT prices are required"); return; }
+    const payload: any = {
       category_id: form.category_id || null, name: form.name, description: form.description || null,
-      rate: Number(form.rate), min_quantity: Number(form.min_quantity), max_quantity: Number(form.max_quantity),
+      rate: Number(form.rate), rate_inr: Number(form.rate_inr), rate_usdt: Number(form.rate_usdt),
+      min_quantity: Number(form.min_quantity), max_quantity: Number(form.max_quantity),
       provider_id: form.provider_id || null, provider_service_id: form.provider_service_id || null,
     };
     if (editing) {
@@ -115,12 +126,16 @@ export default function AdminServices() {
 
               <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
                 <div className="flex items-center gap-1 text-xs">
-                  <Zap className="h-3 w-3 text-primary" />
-                  <span className="font-bold text-foreground">${s.rate}</span>
+                  <span className="font-bold text-foreground">₹{(s as any).rate_inr || 0}</span>
                   <span className="text-muted-foreground">/1K</span>
                 </div>
-                <span className="text-[10px] text-muted-foreground">Min: {s.min_quantity} | Max: {s.max_quantity}</span>
+                <div className="h-3 w-px bg-border" />
+                <div className="flex items-center gap-1 text-xs">
+                  <span className="font-bold text-foreground">${(s as any).rate_usdt || 0}</span>
+                  <span className="text-muted-foreground">/1K</span>
+                </div>
               </div>
+              <div className="text-[10px] text-muted-foreground mt-1">Min: {s.min_quantity} | Max: {s.max_quantity}</div>
 
               <div className="flex items-center gap-1 mt-3">
                 <Button variant="outline" size="sm" onClick={() => openEdit(s)} className="flex-1 h-8 text-xs rounded-lg">
@@ -148,8 +163,26 @@ export default function AdminServices() {
             </div>
             <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-11 rounded-lg" /></div>
             <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} className="rounded-lg" /></div>
+            
+            {/* Dual Pricing */}
+            <div className="border border-border rounded-xl p-4 space-y-3 bg-muted/30">
+              <p className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-primary" /> Pricing (per 1K)
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Price in INR (₹)</Label>
+                  <Input type="number" step="0.01" value={form.rate_inr || ""} onChange={(e) => setForm({ ...form, rate_inr: Number(e.target.value) })} placeholder="e.g. 50" className="h-11 rounded-lg" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Price in USDT ($)</Label>
+                  <Input type="number" step="0.01" value={form.rate_usdt || ""} onChange={(e) => setForm({ ...form, rate_usdt: Number(e.target.value) })} placeholder="e.g. 0.50" className="h-11 rounded-lg" />
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rate ($)</Label><Input type="number" step="0.01" value={form.rate} onChange={(e) => setForm({ ...form, rate: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
+              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rate ($) Legacy</Label><Input type="number" step="0.01" value={form.rate} onChange={(e) => setForm({ ...form, rate: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
               <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Min</Label><Input type="number" value={form.min_quantity} onChange={(e) => setForm({ ...form, min_quantity: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
               <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Max</Label><Input type="number" value={form.max_quantity} onChange={(e) => setForm({ ...form, max_quantity: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
             </div>
