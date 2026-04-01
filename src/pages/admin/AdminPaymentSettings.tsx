@@ -55,8 +55,13 @@ export default function AdminPaymentSettings() {
       supabase.from("payment_settings").upsert({ method: "market_rate", details: { rate: marketRate }, updated_at: new Date().toISOString() }, { onConflict: "method" }),
     ];
     const results = await Promise.all(updates);
-    if (results.some((r) => r.error)) toast.error("Failed to save settings");
-    else toast.success("Payment settings saved!");
+    const failed = results.find((r) => r.error);
+    if (failed) {
+      console.error("Payment settings save error:", failed.error);
+      toast.error(`Failed to save: ${failed.error.message}`);
+    } else {
+      toast.success("Payment settings saved!");
+    }
     setSaving(false);
   };
 
