@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserData = async (userId: string) => {
     const [rolesRes, profileRes] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("profiles").select("name, email, wallet_balance, status, wallet_currency").eq("user_id", userId).single(),
+      supabase.from("profiles").select("name, email, wallet_balance, status, wallet_currency").eq("user_id", userId).single() as any,
     ]);
     if (rolesRes.data && rolesRes.data.length > 0) {
       const hasAdmin = rolesRes.data.some((r) => r.role === "admin");
