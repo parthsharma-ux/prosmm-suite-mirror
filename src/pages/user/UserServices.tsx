@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrency } from "@/hooks/useCurrency";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,12 +15,8 @@ type PublicService = Tables<"public_services">;
 type Category = Tables<"categories">;
 
 export default function UserServices() {
-  const { user, profile } = useAuth();
-  const walletCurrency = (profile as any)?.wallet_currency as string | null;
-  // Determine display currency: locked wallet or default INR
-  const displayCurrency = walletCurrency === "USDT" ? "USDT" : "INR";
-  const currencySymbol = displayCurrency === "USDT" ? "$" : "₹";
-
+  const { user } = useAuth();
+  const { format } = useCurrency();
   const [services, setServices] = useState<PublicService[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,13 +40,6 @@ export default function UserServices() {
     fetchData();
   }, []);
 
-  const getServiceRate = (s: PublicService) => {
-    if (displayCurrency === "USDT") return Number((s as any).rate_usdt || s.rate);
-    return Number((s as any).rate_inr || 0);
-  };
-
-  const formatPrice = (rate: number) => `${currencySymbol}${rate.toFixed(2)}`;
-
   const filteredServices = services.filter((s) => {
     const matchesCategory = !selectedCategory || s.category_id === selectedCategory;
     const matchesSearch = !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -58,8 +48,7 @@ export default function UserServices() {
   });
 
   const service = services.find((s) => s.id === selectedService);
-  const serviceRate = service ? getServiceRate(service) : 0;
-  const totalCharge = service ? (serviceRate / 1000) * quantity : 0;
+  const totalCharge = service ? (service.rate / 1000) * quantity : 0;
 
   const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +63,7 @@ export default function UserServices() {
       const res = await fetch(`https://${projectId}.supabase.co/functions/v1/place-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ public_service_id: service.id, link: link.trim(), quantity }),
+        body: JSON.stringify({ public_service_id: service.id, link: link.trim() || "", quantity }),
       });
       const data = await res.json();
       if (!res.ok) toast.error(data.error || "Failed to place order");
@@ -121,7 +110,12 @@ export default function UserServices() {
             <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Search</Label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Name or service ID…" className="pl-10 h-11 rounded-lg" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Name or service ID…"
+                className="pl-10 h-11 rounded-lg"
+              />
             </div>
           </div>
         </div>
@@ -152,7 +146,7 @@ export default function UserServices() {
                       <span className="text-sm font-medium break-words" style={{ overflowWrap: "anywhere", whiteSpace: "normal", lineHeight: "1.4" }}>{s.name}</span>
                     </div>
                     <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-1.5 ml-0.5">
-                      <span className="font-semibold text-foreground">{formatPrice(getServiceRate(s))}/1K</span>
+                      <span className="font-semibold text-foreground">{format(s.rate, 2)}/1K</span>
                       <span className="text-muted-foreground">Min: {s.min_quantity}</span>
                       <span className="text-muted-foreground">Max: {s.max_quantity}</span>
                     </div>
@@ -188,7 +182,7 @@ export default function UserServices() {
                 <div className="flex items-center gap-4 pt-1">
                   <div className="flex items-center gap-1.5 text-xs">
                     <Zap className="h-3.5 w-3.5 text-primary" />
-                    <span className="font-bold text-foreground">{formatPrice(serviceRate)}/1K</span>
+                    <span className="font-bold text-foreground">{format(service.rate, 2)}/1K</span>
                   </div>
                   <div className="h-3.5 w-px bg-border" />
                   <span className="text-[11px] text-muted-foreground">Min: <span className="font-medium text-foreground">{service.min_quantity}</span></span>
@@ -204,7 +198,14 @@ export default function UserServices() {
           <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
             <LinkIcon className="h-3.5 w-3.5" /> Link / @Username
           </Label>
-          <Input type="text" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://example.com/post or @username" required className="h-11 rounded-lg" />
+          <Input
+            type="text"
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            placeholder="https://example.com/post or @username"
+            required
+            className="h-11 rounded-lg"
+          />
           <p className="text-[10px] text-muted-foreground mt-2">Enter a URL link or @username depending on the service</p>
         </div>
 
@@ -214,18 +215,31 @@ export default function UserServices() {
             <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
               <Hash className="h-3.5 w-3.5" /> Quantity
             </Label>
-            <Input type="number" value={quantity || ""} onChange={(e) => setQuantity(Number(e.target.value))} min={service?.min_quantity || 1} max={service?.max_quantity || 10000} required placeholder={service ? `${service.min_quantity} – ${service.max_quantity}` : "0"} className="h-11 rounded-lg" />
+            <Input
+              type="number"
+              value={quantity || ""}
+              onChange={(e) => setQuantity(Number(e.target.value))}
+              min={service?.min_quantity || 1}
+              max={service?.max_quantity || 10000}
+              required
+              placeholder={service ? `${service.min_quantity} – ${service.max_quantity}` : "0"}
+              className="h-11 rounded-lg"
+            />
           </div>
           <div className="ecom-card p-5">
             <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Total Charge</Label>
             <div className="flex items-center h-11 rounded-lg border border-border bg-muted/50 px-4">
-              <span className="text-base font-bold text-foreground">{formatPrice(totalCharge)}</span>
+              <span className="text-base font-bold text-foreground">{format(totalCharge, 4)}</span>
             </div>
           </div>
         </div>
 
         {/* Submit */}
-        <Button type="submit" className="w-full h-12 font-semibold text-sm rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all" disabled={submitting || !selectedService}>
+        <Button
+          type="submit"
+          className="w-full h-12 font-semibold text-sm rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
+          disabled={submitting || !selectedService}
+        >
           {submitting ? (
             <span className="flex items-center gap-2">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />

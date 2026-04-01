@@ -1,27 +1,18 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrency } from "@/hooks/useCurrency";
 import StatCard from "@/components/StatCard";
-import { Wallet, ShoppingCart, CheckCircle, Clock, TrendingUp, ArrowRight, Lock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Wallet, ShoppingCart, CheckCircle, Clock, TrendingUp, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 export default function UserDashboard() {
   const { user, profile } = useAuth();
+  const { formatWallet, marketRate } = useCurrency();
   const navigate = useNavigate();
   const [stats, setStats] = useState({ total: 0, active: 0, completed: 0 });
   const [loading, setLoading] = useState(true);
-
-  const walletCurrency = (profile as any)?.wallet_currency as string | null;
-
-  // Show balance in the user's locked currency directly
-  const getBalanceDisplay = () => {
-    const balance = profile?.wallet_balance ?? 0;
-    if (walletCurrency === "INR") return `₹${balance.toFixed(2)}`;
-    if (walletCurrency === "USDT") return `$${balance.toFixed(2)}`;
-    // Not locked yet - show raw USD
-    return `$${balance.toFixed(2)}`;
-  };
 
   useEffect(() => {
     if (!user) return;
@@ -47,21 +38,13 @@ export default function UserDashboard() {
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="ecom-card p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Wallet Balance</span>
-            <Wallet className="h-4 w-4 text-primary" />
-          </div>
-          <p className="text-2xl font-bold text-foreground">{getBalanceDisplay()}</p>
-          {walletCurrency ? (
-            <Badge variant="outline" className="mt-2 text-[10px] font-semibold gap-1 border-primary/30 text-primary">
-              <Lock className="h-2.5 w-2.5" />
-              {walletCurrency} Locked
-            </Badge>
-          ) : (
-            <p className="text-[10px] text-muted-foreground mt-2">Currency locks after first deposit</p>
-          )}
-        </div>
+        <StatCard title="Wallet Balance" value={
+          profile?.wallet_currency === "INR"
+            ? `₹${((profile?.wallet_balance ?? 0) * (marketRate || 93)).toFixed(2)}`
+            : profile?.wallet_currency === "USDT"
+              ? `$${(profile?.wallet_balance ?? 0).toFixed(2)}`
+              : formatWallet(profile?.wallet_balance ?? 0)
+        } icon={Wallet} />
         <StatCard title="Total Orders" value={stats.total} icon={ShoppingCart} />
         <StatCard title="Active Orders" value={stats.active} icon={Clock} />
         <StatCard title="Completed" value={stats.completed} icon={CheckCircle} />
@@ -74,7 +57,11 @@ export default function UserDashboard() {
           { title: "Add Funds", desc: "Deposit money to your wallet", icon: Wallet, path: "/dashboard/funds", color: "bg-success/10 text-success" },
           { title: "View Orders", desc: "Track your order history", icon: TrendingUp, path: "/dashboard/orders", color: "bg-warning/10 text-warning" },
         ].map((action) => (
-          <div key={action.title} className="ecom-card-interactive p-5 cursor-pointer group" onClick={() => navigate(action.path)}>
+          <div
+            key={action.title}
+            className="ecom-card-interactive p-5 cursor-pointer group"
+            onClick={() => navigate(action.path)}
+          >
             <div className="flex items-center gap-4">
               <div className={`p-3 rounded-xl ${action.color} shrink-0`}>
                 <action.icon className="h-5 w-5" />

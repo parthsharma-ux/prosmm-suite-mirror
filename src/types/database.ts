@@ -43,9 +43,9 @@ export type Database = {
         Relationships: []
       }
       profiles: {
-        Row: { created_at: string; email: string; id: string; name: string | null; status: string; updated_at: string; user_id: string; wallet_balance: number; wallet_currency: string | null }
-        Insert: { created_at?: string; email: string; id?: string; name?: string | null; status?: string; updated_at?: string; user_id: string; wallet_balance?: number; wallet_currency?: string | null }
-        Update: { created_at?: string; email?: string; id?: string; name?: string | null; status?: string; updated_at?: string; user_id?: string; wallet_balance?: number; wallet_currency?: string | null }
+        Row: { created_at: string; email: string; id: string; name: string | null; status: string; updated_at: string; user_id: string; wallet_balance: number }
+        Insert: { created_at?: string; email: string; id?: string; name?: string | null; status?: string; updated_at?: string; user_id: string; wallet_balance?: number }
+        Update: { created_at?: string; email?: string; id?: string; name?: string | null; status?: string; updated_at?: string; user_id?: string; wallet_balance?: number }
         Relationships: []
       }
       providers: {
@@ -55,9 +55,9 @@ export type Database = {
         Relationships: []
       }
       public_services: {
-        Row: { category_id: string | null; created_at: string; description: string | null; id: string; max_quantity: number; min_quantity: number; name: string; rate: number; rate_inr: number; rate_usdt: number; status: string; provider_id: string | null; provider_service_id: string | null }
-        Insert: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max_quantity?: number; min_quantity?: number; name: string; rate?: number; rate_inr?: number; rate_usdt?: number; status?: string; provider_id?: string | null; provider_service_id?: string | null }
-        Update: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max_quantity?: number; min_quantity?: number; name?: string; rate?: number; rate_inr?: number; rate_usdt?: number; status?: string; provider_id?: string | null; provider_service_id?: string | null }
+        Row: { category_id: string | null; created_at: string; description: string | null; id: string; max_quantity: number; min_quantity: number; name: string; rate: number; status: string; provider_id: string | null; provider_service_id: string | null }
+        Insert: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max_quantity?: number; min_quantity?: number; name: string; rate?: number; status?: string; provider_id?: string | null; provider_service_id?: string | null }
+        Update: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max_quantity?: number; min_quantity?: number; name?: string; rate?: number; status?: string; provider_id?: string | null; provider_service_id?: string | null }
         Relationships: []
       }
       transactions: {
