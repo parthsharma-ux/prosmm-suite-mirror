@@ -14,7 +14,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/logo-small.webp";
+import logo from "@/assets/logo-7smmpanel.jpg";
 
 const navItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
