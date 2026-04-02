@@ -7,8 +7,14 @@ import { Wallet } from "lucide-react";
 
 export default function UserLayout() {
   const { profile } = useAuth();
-  const { formatWallet } = useCurrency();
+  const { formatWallet, marketRate } = useCurrency();
   const balance = profile?.wallet_balance ?? 0;
+
+  const displayBalance = profile?.wallet_currency === "INR"
+    ? `₹${(balance * (marketRate || 93)).toFixed(2)}`
+    : profile?.wallet_currency === "USDT"
+      ? `$${balance.toFixed(2)}`
+      : formatWallet(balance);
 
   return (
     <SidebarProvider>
@@ -22,7 +28,7 @@ export default function UserLayout() {
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg">
                 <Wallet className="h-3.5 w-3.5 text-primary" />
-                <span className="text-sm font-bold text-foreground whitespace-nowrap">{formatWallet(balance)}</span>
+                <span className="text-sm font-bold text-foreground whitespace-nowrap">{displayBalance}</span>
               </div>
             </div>
           </header>

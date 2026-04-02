@@ -33,7 +33,14 @@ export default function UserSidebar() {
   const { formatWallet } = useCurrency();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { marketRate } = useCurrency();
   const balance = profile?.wallet_balance ?? 0;
+
+  const displayBalance = profile?.wallet_currency === "INR"
+    ? `₹${(balance * (marketRate || 93)).toFixed(2)}`
+    : profile?.wallet_currency === "USDT"
+      ? `$${balance.toFixed(2)}`
+      : formatWallet(balance);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -77,7 +84,7 @@ export default function UserSidebar() {
         {!collapsed && (
           <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-primary/5 border border-primary/10">
             <span className="text-[11px] font-medium text-muted-foreground">Balance</span>
-            <span className="text-sm font-bold text-foreground">{formatWallet(balance)}</span>
+            <span className="text-sm font-bold text-foreground">{displayBalance}</span>
           </div>
         )}
         <div className="flex items-center justify-center gap-1">
