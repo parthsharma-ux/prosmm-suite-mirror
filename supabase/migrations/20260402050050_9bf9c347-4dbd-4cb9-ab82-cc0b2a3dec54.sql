@@ -1,0 +1,1 @@
+ALTER TABLE public.payment_settings DROP CONSTRAINT payment_settings_method_check;
