@@ -208,6 +208,8 @@ export type Database = {
           provider_id: string | null
           provider_service_id: string | null
           rate: number
+          rate_inr: number
+          rate_usdt: number
           status: string
         }
         Insert: {
@@ -221,6 +223,8 @@ export type Database = {
           provider_id?: string | null
           provider_service_id?: string | null
           rate?: number
+          rate_inr?: number
+          rate_usdt?: number
           status?: string
         }
         Update: {
@@ -234,6 +238,8 @@ export type Database = {
           provider_id?: string | null
           provider_service_id?: string | null
           rate?: number
+          rate_inr?: number
+          rate_usdt?: number
           status?: string
         }
         Relationships: [
