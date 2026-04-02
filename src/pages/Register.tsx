@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { UserPlus, Eye, EyeOff } from "lucide-react";
-import logo from "@/assets/logo-small.webp";
+import logo from "@/assets/logo-7smmpanel.jpg";
 
 export default function Register() {
   const { user, role, loading } = useAuth();
