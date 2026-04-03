@@ -10,6 +10,8 @@ import AdminLayout from "@/components/AdminLayout";
 import UserLayout from "@/components/UserLayout";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminProviders from "@/pages/admin/AdminProviders";
 import AdminCategories from "@/pages/admin/AdminCategories";
