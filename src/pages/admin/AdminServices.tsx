@@ -36,6 +36,13 @@ export default function AdminServices() {
     setServices(s.data || []);
     setCategories(c.data || []);
     setProviders(p.data || []);
+    // Fetch exchange rate
+    const { data: psData } = await supabase.from("payment_settings").select("method, details").eq("method", "exchange_rate");
+    if (psData && psData[0]) {
+      const details = psData[0].details as Record<string, string> || {};
+      const rate = parseFloat(details.rate);
+      if (!isNaN(rate) && rate > 0) setExchangeRate(rate);
+    }
     setLoading(false);
   };
 
