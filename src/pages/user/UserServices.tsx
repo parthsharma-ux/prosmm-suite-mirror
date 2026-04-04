@@ -155,7 +155,7 @@ export default function UserServices() {
                       <span className="text-sm font-medium break-words" style={{ overflowWrap: "anywhere", whiteSpace: "normal", lineHeight: "1.4" }}>{s.name}</span>
                     </div>
                     <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-1.5 ml-0.5">
-                      <span className="font-semibold text-foreground">{format(s.rate, 2)}/1K</span>
+                      <span className="font-semibold text-foreground">{formatRate(getRate(s), 2)}/1K</span>
                       <span className="text-muted-foreground">Min: {s.min_quantity}</span>
                       <span className="text-muted-foreground">Max: {s.max_quantity}</span>
                     </div>
