@@ -43,9 +43,9 @@ export type Database = {
         Relationships: []
       }
       profiles: {
-        Row: { created_at: string; email: string; id: string; name: string | null; status: string; updated_at: string; user_id: string; wallet_balance: number }
-        Insert: { created_at?: string; email: string; id?: string; name?: string | null; status?: string; updated_at?: string; user_id: string; wallet_balance?: number }
-        Update: { created_at?: string; email?: string; id?: string; name?: string | null; status?: string; updated_at?: string; user_id?: string; wallet_balance?: number }
+        Row: { created_at: string; email: string; id: string; name: string | null; status: string; updated_at: string; user_id: string; wallet_balance: number; wallet_currency: string | null }
+        Insert: { created_at?: string; email: string; id?: string; name?: string | null; status?: string; updated_at?: string; user_id: string; wallet_balance?: number; wallet_currency?: string | null }
+        Update: { created_at?: string; email?: string; id?: string; name?: string | null; status?: string; updated_at?: string; user_id?: string; wallet_balance?: number; wallet_currency?: string | null }
         Relationships: []
       }
       providers: {
