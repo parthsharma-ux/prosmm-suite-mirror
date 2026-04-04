@@ -124,12 +124,13 @@ export default function AdminServices() {
                 {getProviderName(s.provider_id) && <span className="text-[10px]">{getProviderName(s.provider_id)}</span>}
               </div>
 
-              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
+              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border flex-wrap">
                 <div className="flex items-center gap-1 text-xs">
                   <Zap className="h-3 w-3 text-primary" />
-                  <span className="font-bold text-foreground">${s.rate}</span>
+                  <span className="font-bold text-foreground">${s.rate_usdt}</span>
                   <span className="text-muted-foreground">/1K</span>
                 </div>
+                <span className="text-[10px] text-muted-foreground">₹{s.rate_inr}/1K</span>
                 <span className="text-[10px] text-muted-foreground">Min: {s.min_quantity} | Max: {s.max_quantity}</span>
               </div>
 
