@@ -53,9 +53,12 @@ export default function AdminServices() {
 
   const handleSave = async () => {
     if (!form.name) { toast.error("Name required"); return; }
+    const rateUsdt = Number(form.rate_usdt) || Number(form.rate);
+    const rateInr = Number(form.rate_inr) || (rateUsdt * exchangeRate);
     const payload = {
       category_id: form.category_id || null, name: form.name, description: form.description || null,
-      rate: Number(form.rate), min_quantity: Number(form.min_quantity), max_quantity: Number(form.max_quantity),
+      rate: Number(form.rate), rate_usdt: rateUsdt, rate_inr: rateInr,
+      min_quantity: Number(form.min_quantity), max_quantity: Number(form.max_quantity),
       provider_id: form.provider_id || null, provider_service_id: form.provider_service_id || null,
     };
     if (editing) {
