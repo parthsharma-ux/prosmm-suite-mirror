@@ -67,14 +67,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    const amount = (service.rate / 1000) * quantity;
-
-    // Check wallet balance
+    // Determine rate based on user's wallet currency
     const { data: profile } = await adminClient
       .from("profiles")
-      .select("wallet_balance")
+      .select("wallet_balance, wallet_currency")
       .eq("user_id", user.id)
       .single();
+
+    let rateToUse = service.rate; // default USD rate
+    let currencyLabel = "USD";
+    if (profile?.wallet_currency === "INR") {
+      rateToUse = service.rate_inr;
+      currencyLabel = "INR";
+    } else if (profile?.wallet_currency === "USDT") {
+      rateToUse = service.rate_usdt;
+      currencyLabel = "USDT";
+    }
+
+    const amount = (rateToUse / 1000) * quantity;
 
     if (!profile || profile.wallet_balance < amount) {
       return new Response(JSON.stringify({ error: "Insufficient balance" }), {
