@@ -23,8 +23,9 @@ export default function AdminServices() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
-  const [form, setForm] = useState({ category_id: "", name: "", description: "", rate: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" });
+  const [form, setForm] = useState({ category_id: "", name: "", description: "", rate: 0, rate_inr: 0, rate_usdt: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" });
   const [searchQuery, setSearchQuery] = useState("");
+  const [exchangeRate, setExchangeRate] = useState(110);
 
   const fetchData = async () => {
     const [s, c, p] = await Promise.all([
