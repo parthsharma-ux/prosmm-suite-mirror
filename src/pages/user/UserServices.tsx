@@ -191,7 +191,7 @@ export default function UserServices() {
                 <div className="flex items-center gap-4 pt-1">
                   <div className="flex items-center gap-1.5 text-xs">
                     <Zap className="h-3.5 w-3.5 text-primary" />
-                    <span className="font-bold text-foreground">{format(service.rate, 2)}/1K</span>
+                    <span className="font-bold text-foreground">{formatRate(getRate(service), 2)}/1K</span>
                   </div>
                   <div className="h-3.5 w-px bg-border" />
                   <span className="text-[11px] text-muted-foreground">Min: <span className="font-medium text-foreground">{service.min_quantity}</span></span>
