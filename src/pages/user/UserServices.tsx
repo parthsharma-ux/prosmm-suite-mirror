@@ -48,7 +48,8 @@ export default function UserServices() {
   });
 
   const service = services.find((s) => s.id === selectedService);
-  const totalCharge = service ? (service.rate / 1000) * quantity : 0;
+  const activeRate = service ? getRate(service) : 0;
+  const totalCharge = service ? (activeRate / 1000) * quantity : 0;
 
   const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault();
