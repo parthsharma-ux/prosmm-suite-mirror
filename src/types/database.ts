@@ -55,9 +55,9 @@ export type Database = {
         Relationships: []
       }
       public_services: {
-        Row: { category_id: string | null; created_at: string; description: string | null; id: string; max_quantity: number; min_quantity: number; name: string; rate: number; status: string; provider_id: string | null; provider_service_id: string | null }
-        Insert: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max_quantity?: number; min_quantity?: number; name: string; rate?: number; status?: string; provider_id?: string | null; provider_service_id?: string | null }
-        Update: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max_quantity?: number; min_quantity?: number; name?: string; rate?: number; status?: string; provider_id?: string | null; provider_service_id?: string | null }
+        Row: { category_id: string | null; created_at: string; description: string | null; id: string; max_quantity: number; min_quantity: number; name: string; rate: number; rate_inr: number; rate_usdt: number; status: string; provider_id: string | null; provider_service_id: string | null }
+        Insert: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max_quantity?: number; min_quantity?: number; name: string; rate?: number; rate_inr?: number; rate_usdt?: number; status?: string; provider_id?: string | null; provider_service_id?: string | null }
+        Update: { category_id?: string | null; created_at?: string; description?: string | null; id?: string; max_quantity?: number; min_quantity?: number; name?: string; rate?: number; rate_inr?: number; rate_usdt?: number; status?: string; provider_id?: string | null; provider_service_id?: string | null }
         Relationships: []
       }
       transactions: {
