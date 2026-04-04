@@ -15,8 +15,16 @@ type PublicService = Tables<"public_services">;
 type Category = Tables<"categories">;
 
 export default function UserServices() {
-  const { user } = useAuth();
-  const { format } = useCurrency();
+  const { user, profile } = useAuth();
+  const walletCurrency = profile?.wallet_currency; // "INR" | "USDT" | null
+
+  const getRate = (s: PublicService) => {
+    if (walletCurrency === "INR") return s.rate_inr;
+    if (walletCurrency === "USDT") return s.rate_usdt;
+    return s.rate;
+  };
+  const rateSymbol = walletCurrency === "INR" ? "₹" : "$";
+  const formatRate = (v: number, decimals = 2) => `${rateSymbol}${v.toFixed(decimals)}`;
   const [services, setServices] = useState<PublicService[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
