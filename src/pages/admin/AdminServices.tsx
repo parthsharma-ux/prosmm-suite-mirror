@@ -48,8 +48,8 @@ export default function AdminServices() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const openAdd = () => { setEditing(null); setForm({ category_id: "", name: "", description: "", rate: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" }); setDialogOpen(true); };
-  const openEdit = (s: Service) => { setEditing(s); setForm({ category_id: s.category_id || "", name: s.name, description: s.description || "", rate: Number(s.rate), min_quantity: s.min_quantity, max_quantity: s.max_quantity, provider_id: s.provider_id || "", provider_service_id: s.provider_service_id || "" }); setDialogOpen(true); };
+  const openAdd = () => { setEditing(null); setForm({ category_id: "", name: "", description: "", rate: 0, rate_inr: 0, rate_usdt: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" }); setDialogOpen(true); };
+  const openEdit = (s: Service) => { setEditing(s); setForm({ category_id: s.category_id || "", name: s.name, description: s.description || "", rate: Number(s.rate), rate_inr: Number(s.rate_inr), rate_usdt: Number(s.rate_usdt), min_quantity: s.min_quantity, max_quantity: s.max_quantity, provider_id: s.provider_id || "", provider_service_id: s.provider_service_id || "" }); setDialogOpen(true); };
 
   const handleSave = async () => {
     if (!form.name) { toast.error("Name required"); return; }
