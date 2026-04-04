@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useCurrency } from "@/hooks/useCurrency";
+
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +15,16 @@ type PublicService = Tables<"public_services">;
 type Category = Tables<"categories">;
 
 export default function UserServices() {
-  const { user } = useAuth();
-  const { format } = useCurrency();
+  const { user, profile } = useAuth();
+  const walletCurrency = profile?.wallet_currency; // "INR" | "USDT" | null
+
+  const getRate = (s: PublicService) => {
+    if (walletCurrency === "INR") return s.rate_inr;
+    if (walletCurrency === "USDT") return s.rate_usdt;
+    return s.rate;
+  };
+  const rateSymbol = walletCurrency === "INR" ? "₹" : "$";
+  const formatRate = (v: number, decimals = 2) => `${rateSymbol}${v.toFixed(decimals)}`;
   const [services, setServices] = useState<PublicService[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +56,8 @@ export default function UserServices() {
   });
 
   const service = services.find((s) => s.id === selectedService);
-  const totalCharge = service ? (service.rate / 1000) * quantity : 0;
+  const activeRate = service ? getRate(service) : 0;
+  const totalCharge = service ? (activeRate / 1000) * quantity : 0;
 
   const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,7 +155,7 @@ export default function UserServices() {
                       <span className="text-sm font-medium break-words" style={{ overflowWrap: "anywhere", whiteSpace: "normal", lineHeight: "1.4" }}>{s.name}</span>
                     </div>
                     <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-1.5 ml-0.5">
-                      <span className="font-semibold text-foreground">{format(s.rate, 2)}/1K</span>
+                      <span className="font-semibold text-foreground">{formatRate(getRate(s), 2)}/1K</span>
                       <span className="text-muted-foreground">Min: {s.min_quantity}</span>
                       <span className="text-muted-foreground">Max: {s.max_quantity}</span>
                     </div>
@@ -182,7 +191,7 @@ export default function UserServices() {
                 <div className="flex items-center gap-4 pt-1">
                   <div className="flex items-center gap-1.5 text-xs">
                     <Zap className="h-3.5 w-3.5 text-primary" />
-                    <span className="font-bold text-foreground">{format(service.rate, 2)}/1K</span>
+                    <span className="font-bold text-foreground">{formatRate(getRate(service), 2)}/1K</span>
                   </div>
                   <div className="h-3.5 w-px bg-border" />
                   <span className="text-[11px] text-muted-foreground">Min: <span className="font-medium text-foreground">{service.min_quantity}</span></span>
@@ -229,7 +238,7 @@ export default function UserServices() {
           <div className="ecom-card p-5">
             <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Total Charge</Label>
             <div className="flex items-center h-11 rounded-lg border border-border bg-muted/50 px-4">
-              <span className="text-base font-bold text-foreground">{format(totalCharge, 4)}</span>
+              <span className="text-base font-bold text-foreground">{formatRate(totalCharge, 4)}</span>
             </div>
           </div>
         </div>
