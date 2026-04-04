@@ -238,7 +238,7 @@ export default function UserServices() {
           <div className="ecom-card p-5">
             <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Total Charge</Label>
             <div className="flex items-center h-11 rounded-lg border border-border bg-muted/50 px-4">
-              <span className="text-base font-bold text-foreground">{format(totalCharge, 4)}</span>
+              <span className="text-base font-bold text-foreground">{formatRate(totalCharge, 4)}</span>
             </div>
           </div>
         </div>
