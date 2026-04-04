@@ -23,8 +23,9 @@ export default function AdminServices() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Service | null>(null);
-  const [form, setForm] = useState({ category_id: "", name: "", description: "", rate: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" });
+  const [form, setForm] = useState({ category_id: "", name: "", description: "", rate: 0, rate_inr: 0, rate_usdt: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" });
   const [searchQuery, setSearchQuery] = useState("");
+  const [exchangeRate, setExchangeRate] = useState(110);
 
   const fetchData = async () => {
     const [s, c, p] = await Promise.all([
@@ -35,19 +36,29 @@ export default function AdminServices() {
     setServices(s.data || []);
     setCategories(c.data || []);
     setProviders(p.data || []);
+    // Fetch exchange rate
+    const { data: psData } = await supabase.from("payment_settings").select("method, details").eq("method", "exchange_rate");
+    if (psData && psData[0]) {
+      const details = psData[0].details as Record<string, string> || {};
+      const rate = parseFloat(details.rate);
+      if (!isNaN(rate) && rate > 0) setExchangeRate(rate);
+    }
     setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
 
-  const openAdd = () => { setEditing(null); setForm({ category_id: "", name: "", description: "", rate: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" }); setDialogOpen(true); };
-  const openEdit = (s: Service) => { setEditing(s); setForm({ category_id: s.category_id || "", name: s.name, description: s.description || "", rate: Number(s.rate), min_quantity: s.min_quantity, max_quantity: s.max_quantity, provider_id: s.provider_id || "", provider_service_id: s.provider_service_id || "" }); setDialogOpen(true); };
+  const openAdd = () => { setEditing(null); setForm({ category_id: "", name: "", description: "", rate: 0, rate_inr: 0, rate_usdt: 0, min_quantity: 1, max_quantity: 10000, provider_id: "", provider_service_id: "" }); setDialogOpen(true); };
+  const openEdit = (s: Service) => { setEditing(s); setForm({ category_id: s.category_id || "", name: s.name, description: s.description || "", rate: Number(s.rate), rate_inr: Number(s.rate_inr), rate_usdt: Number(s.rate_usdt), min_quantity: s.min_quantity, max_quantity: s.max_quantity, provider_id: s.provider_id || "", provider_service_id: s.provider_service_id || "" }); setDialogOpen(true); };
 
   const handleSave = async () => {
     if (!form.name) { toast.error("Name required"); return; }
+    const rateUsdt = Number(form.rate_usdt) || Number(form.rate);
+    const rateInr = Number(form.rate_inr) || (rateUsdt * exchangeRate);
     const payload = {
       category_id: form.category_id || null, name: form.name, description: form.description || null,
-      rate: Number(form.rate), min_quantity: Number(form.min_quantity), max_quantity: Number(form.max_quantity),
+      rate: Number(form.rate), rate_usdt: rateUsdt, rate_inr: rateInr,
+      min_quantity: Number(form.min_quantity), max_quantity: Number(form.max_quantity),
       provider_id: form.provider_id || null, provider_service_id: form.provider_service_id || null,
     };
     if (editing) {
@@ -113,12 +124,13 @@ export default function AdminServices() {
                 {getProviderName(s.provider_id) && <span className="text-[10px]">{getProviderName(s.provider_id)}</span>}
               </div>
 
-              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
+              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border flex-wrap">
                 <div className="flex items-center gap-1 text-xs">
                   <Zap className="h-3 w-3 text-primary" />
-                  <span className="font-bold text-foreground">${s.rate}</span>
+                  <span className="font-bold text-foreground">${s.rate_usdt}</span>
                   <span className="text-muted-foreground">/1K</span>
                 </div>
+                <span className="text-[10px] text-muted-foreground">₹{s.rate_inr}/1K</span>
                 <span className="text-[10px] text-muted-foreground">Min: {s.min_quantity} | Max: {s.max_quantity}</span>
               </div>
 
@@ -149,7 +161,12 @@ export default function AdminServices() {
             <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-11 rounded-lg" /></div>
             <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} className="rounded-lg" /></div>
             <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rate ($)</Label><Input type="number" step="0.01" value={form.rate} onChange={(e) => setForm({ ...form, rate: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
+              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rate USDT ($)</Label><Input type="number" step="0.01" value={form.rate_usdt} onChange={(e) => { const v = Number(e.target.value); setForm({ ...form, rate_usdt: v, rate: v, rate_inr: parseFloat((v * exchangeRate).toFixed(2)) }); }} className="h-11 rounded-lg" /></div>
+              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rate INR (₹)</Label><Input type="number" step="0.01" value={form.rate_inr} onChange={(e) => setForm({ ...form, rate_inr: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
+              <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rate Base ($)</Label><Input type="number" step="0.01" value={form.rate} onChange={(e) => setForm({ ...form, rate: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
+            </div>
+            <p className="text-[10px] text-muted-foreground -mt-2">INR auto-calculated from USDT × {exchangeRate}. You can override INR manually.</p>
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Min</Label><Input type="number" value={form.min_quantity} onChange={(e) => setForm({ ...form, min_quantity: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
               <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Max</Label><Input type="number" value={form.max_quantity} onChange={(e) => setForm({ ...form, max_quantity: Number(e.target.value) })} className="h-11 rounded-lg" /></div>
             </div>
