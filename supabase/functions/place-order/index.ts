@@ -81,50 +81,66 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Pick the rate matching user's locked currency
-    // wallet_balance is stored in the SAME currency as wallet_currency
-    // INR user → wallet stores INR, use rate_inr
-    // USDT user → wallet stores USDT, use rate_usdt
-    let rateToUse = service.rate_usdt; // default USDT
+    // Wallet stores USD internally for all users.
+    // Pick the rate matching user's locked currency for display,
+    // then convert to USD using panel exchange_rate for actual deduction.
+    let exchangeRate = 110;
+    if (profile.wallet_currency === "INR") {
+      const { data: exData } = await adminClient
+        .from("payment_settings")
+        .select("details")
+        .eq("method", "exchange_rate")
+        .single();
+      if (exData?.details) {
+        const r = parseFloat((exData.details as Record<string, string>).rate);
+        if (!isNaN(r) && r > 0) exchangeRate = r;
+      }
+    }
+
+    let displayRate = service.rate_usdt;
     let currencyLabel = "USDT";
     let currencySymbol = "$";
 
     if (profile.wallet_currency === "INR") {
-      rateToUse = service.rate_inr;
+      displayRate = service.rate_inr;
       currencyLabel = "INR";
       currencySymbol = "₹";
-    } else if (profile.wallet_currency === "USDT") {
-      rateToUse = service.rate_usdt;
-      currencyLabel = "USDT";
-      currencySymbol = "$";
     }
 
-    // Exact charge = rate per 1000 × quantity / 1000
-    const totalCharge = (rateToUse / 1000) * quantity;
+    // Display charge in user's currency
+    const displayCharge = (displayRate / 1000) * quantity;
 
-    // Check balance — wallet_balance is in the same currency
-    if (profile.wallet_balance < totalCharge) {
+    // USD amount to actually deduct from wallet
+    const usdCharge = profile.wallet_currency === "INR"
+      ? displayCharge / exchangeRate
+      : displayCharge;
+
+    if (profile.wallet_balance < usdCharge) {
+      // Show insufficient error in user's currency
+      const availableDisplay = profile.wallet_currency === "INR"
+        ? profile.wallet_balance * exchangeRate
+        : profile.wallet_balance;
       return new Response(JSON.stringify({
-        error: `Insufficient balance. Need ${currencySymbol}${totalCharge.toFixed(2)}, available: ${currencySymbol}${profile.wallet_balance.toFixed(2)}`
+        error: `Insufficient balance. Need ${currencySymbol}${displayCharge.toFixed(2)}, available: ${currencySymbol}${availableDisplay.toFixed(2)}`
       }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Deduct exact amount from wallet
-    const newBalance = profile.wallet_balance - totalCharge;
+    // Deduct USD amount from wallet
+    const newBalance = profile.wallet_balance - usdCharge;
     await adminClient
       .from("profiles")
       .update({ wallet_balance: newBalance })
       .eq("user_id", user.id);
 
-    // Record transaction with exact amount
+    // Record transaction
     await adminClient.from("transactions").insert({
       user_id: user.id,
-      amount: -totalCharge,
+      amount: -usdCharge,
       type: "order",
-      description: `Order: ${service.name} x${quantity} (${currencySymbol}${totalCharge.toFixed(2)})`,
+      description: `Order: ${service.name} x${quantity} (${currencySymbol}${displayCharge.toFixed(2)})`,
     });
 
     // Try to place order with provider API if service has provider mapping
