@@ -187,7 +187,7 @@ Deno.serve(async (req) => {
         service_id: public_service_id,
         link,
         quantity,
-        amount: totalCharge,
+        amount: usdCharge,
         status: providerOrderId ? "processing" : "pending",
         provider_order_id: providerOrderId,
       })
@@ -206,7 +206,7 @@ Deno.serve(async (req) => {
         success: true,
         order_id: order.id,
         provider_order_id: providerOrderId,
-        charged: totalCharge,
+        charged: displayCharge,
         currency: currencyLabel,
         new_balance: newBalance,
       }),
