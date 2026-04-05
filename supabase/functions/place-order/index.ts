@@ -200,7 +200,9 @@ Deno.serve(async (req) => {
         success: true,
         order_id: order.id,
         provider_order_id: providerOrderId,
-        amount,
+        amount: deductAmount,
+        display_amount: displayAmount,
+        currency: currencyLabel,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
