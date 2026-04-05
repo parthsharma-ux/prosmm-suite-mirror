@@ -74,37 +74,65 @@ Deno.serve(async (req) => {
       .eq("user_id", user.id)
       .single();
 
-    let rateToUse = service.rate; // default USD rate
-    let currencyLabel = "USD";
-    if (profile?.wallet_currency === "INR") {
-      rateToUse = service.rate_inr;
-      currencyLabel = "INR";
-    } else if (profile?.wallet_currency === "USDT") {
-      rateToUse = service.rate_usdt;
-      currencyLabel = "USDT";
-    }
-
-    const amount = (rateToUse / 1000) * quantity;
-
-    if (!profile || profile.wallet_balance < amount) {
-      return new Response(JSON.stringify({ error: "Insufficient balance" }), {
+    if (!profile) {
+      return new Response(JSON.stringify({ error: "Profile not found" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Deduct balance
+    // Fetch exchange rate for INR→USD conversion
+    let exchangeRate = 110;
+    if (profile.wallet_currency === "INR") {
+      const { data: exData } = await adminClient
+        .from("payment_settings")
+        .select("details")
+        .eq("method", "exchange_rate")
+        .single();
+      if (exData?.details) {
+        const r = parseFloat((exData.details as Record<string, string>).rate);
+        if (!isNaN(r) && r > 0) exchangeRate = r;
+      }
+    }
+
+    let displayRate = service.rate; // default USDT rate
+    let currencyLabel = "USDT";
+    if (profile.wallet_currency === "INR") {
+      displayRate = service.rate_inr;
+      currencyLabel = "INR";
+    } else if (profile.wallet_currency === "USDT") {
+      displayRate = service.rate_usdt;
+      currencyLabel = "USDT";
+    }
+
+    // displayRate is per 1000 in the user's currency
+    const displayAmount = (displayRate / 1000) * quantity;
+
+    // Convert to USD for wallet deduction (wallet always stores USD)
+    let deductAmount = displayAmount;
+    if (profile.wallet_currency === "INR") {
+      deductAmount = displayAmount / exchangeRate;
+    }
+
+    if (profile.wallet_balance < deductAmount) {
+      return new Response(JSON.stringify({ error: `Insufficient balance. Need ${currencyLabel} ${displayAmount.toFixed(2)}, wallet: ${currencyLabel === "INR" ? "₹" : "$"}${(profile.wallet_balance * (currencyLabel === "INR" ? exchangeRate : 1)).toFixed(2)}` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Deduct balance (in USD)
     await adminClient
       .from("profiles")
-      .update({ wallet_balance: profile.wallet_balance - amount })
+      .update({ wallet_balance: profile.wallet_balance - deductAmount })
       .eq("user_id", user.id);
 
     // Record transaction
     await adminClient.from("transactions").insert({
       user_id: user.id,
-      amount: -amount,
+      amount: -deductAmount,
       type: "order",
-      description: `Order: ${service.name} x${quantity}`,
+      description: `Order: ${service.name} x${quantity} (${currencyLabel} ${displayAmount.toFixed(2)})`,
     });
 
     // Try to place order with provider API if service has provider mapping
