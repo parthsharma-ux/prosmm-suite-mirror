@@ -15,7 +15,7 @@ type PublicService = Tables<"public_services">;
 type Category = Tables<"categories">;
 
 export default function UserServices() {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const walletCurrency = profile?.wallet_currency; // "INR" | "USDT" | null
 
   const getRate = (s: PublicService) => {
@@ -77,8 +77,10 @@ export default function UserServices() {
       const data = await res.json();
       if (!res.ok) toast.error(data.error || "Failed to place order");
       else {
-        toast.success(data.provider_order_id ? `Order placed & sent to provider! ID: ${data.provider_order_id}` : "Order placed successfully!");
+        toast.success(data.provider_order_id ? `Order placed & sent to provider! ID: ${data.provider_order_id}` : `Order placed! Charged: ${data.currency === "INR" ? "₹" : "$"}${data.charged?.toFixed(2)}`);
         setLink(""); setQuantity(0); setSelectedService(""); setSelectedCategory(""); setSearchQuery("");
+        // Immediately refresh balance
+        await refreshProfile();
       }
     } catch { toast.error("Network error"); }
     setSubmitting(false);

@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Determine rate based on user's wallet currency
+    // Get user profile
     const { data: profile } = await adminClient
       .from("profiles")
       .select("wallet_balance, wallet_currency")
@@ -81,65 +81,56 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch exchange rate for INR→USD conversion
-    let exchangeRate = 110;
-    if (profile.wallet_currency === "INR") {
-      const { data: exData } = await adminClient
-        .from("payment_settings")
-        .select("details")
-        .eq("method", "exchange_rate")
-        .single();
-      if (exData?.details) {
-        const r = parseFloat((exData.details as Record<string, string>).rate);
-        if (!isNaN(r) && r > 0) exchangeRate = r;
-      }
-    }
-
-    let displayRate = service.rate; // default USDT rate
+    // Pick the rate matching user's locked currency
+    // wallet_balance is stored in the SAME currency as wallet_currency
+    // INR user → wallet stores INR, use rate_inr
+    // USDT user → wallet stores USDT, use rate_usdt
+    let rateToUse = service.rate_usdt; // default USDT
     let currencyLabel = "USDT";
+    let currencySymbol = "$";
+
     if (profile.wallet_currency === "INR") {
-      displayRate = service.rate_inr;
+      rateToUse = service.rate_inr;
       currencyLabel = "INR";
+      currencySymbol = "₹";
     } else if (profile.wallet_currency === "USDT") {
-      displayRate = service.rate_usdt;
+      rateToUse = service.rate_usdt;
       currencyLabel = "USDT";
+      currencySymbol = "$";
     }
 
-    // displayRate is per 1000 in the user's currency
-    const displayAmount = (displayRate / 1000) * quantity;
+    // Exact charge = rate per 1000 × quantity / 1000
+    const totalCharge = (rateToUse / 1000) * quantity;
 
-    // Convert to USD for wallet deduction (wallet always stores USD)
-    let deductAmount = displayAmount;
-    if (profile.wallet_currency === "INR") {
-      deductAmount = displayAmount / exchangeRate;
-    }
-
-    if (profile.wallet_balance < deductAmount) {
-      return new Response(JSON.stringify({ error: `Insufficient balance. Need ${currencyLabel} ${displayAmount.toFixed(2)}, wallet: ${currencyLabel === "INR" ? "₹" : "$"}${(profile.wallet_balance * (currencyLabel === "INR" ? exchangeRate : 1)).toFixed(2)}` }), {
+    // Check balance — wallet_balance is in the same currency
+    if (profile.wallet_balance < totalCharge) {
+      return new Response(JSON.stringify({
+        error: `Insufficient balance. Need ${currencySymbol}${totalCharge.toFixed(2)}, available: ${currencySymbol}${profile.wallet_balance.toFixed(2)}`
+      }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Deduct balance (in USD)
+    // Deduct exact amount from wallet
+    const newBalance = profile.wallet_balance - totalCharge;
     await adminClient
       .from("profiles")
-      .update({ wallet_balance: profile.wallet_balance - deductAmount })
+      .update({ wallet_balance: newBalance })
       .eq("user_id", user.id);
 
-    // Record transaction
+    // Record transaction with exact amount
     await adminClient.from("transactions").insert({
       user_id: user.id,
-      amount: -deductAmount,
+      amount: -totalCharge,
       type: "order",
-      description: `Order: ${service.name} x${quantity} (${currencyLabel} ${displayAmount.toFixed(2)})`,
+      description: `Order: ${service.name} x${quantity} (${currencySymbol}${totalCharge.toFixed(2)})`,
     });
 
     // Try to place order with provider API if service has provider mapping
     let providerOrderId: string | null = null;
 
     if (service.provider_id && service.provider_service_id) {
-      // Get provider details
       const { data: provider } = await adminClient
         .from("providers")
         .select("*")
@@ -168,12 +159,11 @@ Deno.serve(async (req) => {
           }
         } catch (e) {
           console.error("Provider API error:", e);
-          // Order still created locally even if provider fails
         }
       }
     }
 
-    // Create order record
+    // Create order record with exact charge amount
     const { data: order, error: orderError } = await adminClient
       .from("orders")
       .insert({
@@ -181,7 +171,7 @@ Deno.serve(async (req) => {
         service_id: public_service_id,
         link,
         quantity,
-        amount: deductAmount,
+        amount: totalCharge,
         status: providerOrderId ? "processing" : "pending",
         provider_order_id: providerOrderId,
       })
@@ -200,9 +190,9 @@ Deno.serve(async (req) => {
         success: true,
         order_id: order.id,
         provider_order_id: providerOrderId,
-        amount: deductAmount,
-        display_amount: displayAmount,
+        charged: totalCharge,
         currency: currencyLabel,
+        new_balance: newBalance,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
