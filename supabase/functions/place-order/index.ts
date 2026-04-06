@@ -81,66 +81,45 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Wallet stores USD internally for all users.
-    // Pick the rate matching user's locked currency for display,
-    // then convert to USD using panel exchange_rate for actual deduction.
-    let exchangeRate = 110;
-    if (profile.wallet_currency === "INR") {
-      const { data: exData } = await adminClient
-        .from("payment_settings")
-        .select("details")
-        .eq("method", "exchange_rate")
-        .single();
-      if (exData?.details) {
-        const r = parseFloat((exData.details as Record<string, string>).rate);
-        if (!isNaN(r) && r > 0) exchangeRate = r;
-      }
-    }
+    // Determine rate and currency based on user's locked wallet currency
+    // NO cross-currency conversion — deduct exact amount in user's currency
+    const isINR = profile.wallet_currency === "INR";
+    const rate = isINR ? service.rate_inr : service.rate_usdt;
+    const currencyLabel = isINR ? "INR" : "USDT";
+    const currencySymbol = isINR ? "₹" : "$";
 
-    let displayRate = service.rate_usdt;
-    let currencyLabel = "USDT";
-    let currencySymbol = "$";
+    // Calculate exact charge: rate is per 1000, use precise math
+    // Round to 4 decimal places to avoid floating point drift
+    const exactCharge = Math.round((rate / 1000) * quantity * 10000) / 10000;
 
-    if (profile.wallet_currency === "INR") {
-      displayRate = service.rate_inr;
-      currencyLabel = "INR";
-      currencySymbol = "₹";
-    }
+    console.log(`[place-order] user=${user.id} currency=${currencyLabel} rate=${rate} qty=${quantity} exactCharge=${exactCharge} walletBalance=${profile.wallet_balance}`);
 
-    // Display charge in user's currency
-    const displayCharge = (displayRate / 1000) * quantity;
-
-    // USD amount to actually deduct from wallet
-    const usdCharge = profile.wallet_currency === "INR"
-      ? displayCharge / exchangeRate
-      : displayCharge;
-
-    if (profile.wallet_balance < usdCharge) {
-      // Show insufficient error in user's currency
-      const availableDisplay = profile.wallet_currency === "INR"
-        ? profile.wallet_balance * exchangeRate
-        : profile.wallet_balance;
+    // Check balance — direct comparison, no conversion
+    if (profile.wallet_balance < exactCharge) {
       return new Response(JSON.stringify({
-        error: `Insufficient balance. Need ${currencySymbol}${displayCharge.toFixed(2)}, available: ${currencySymbol}${availableDisplay.toFixed(2)}`
+        error: `Insufficient balance. Need ${currencySymbol}${exactCharge.toFixed(2)}, available: ${currencySymbol}${profile.wallet_balance.toFixed(2)}`
       }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Deduct USD amount from wallet
-    const newBalance = profile.wallet_balance - usdCharge;
+    // Deduct exact charge from wallet — same currency, no conversion
+    const newBalance = Math.round((profile.wallet_balance - exactCharge) * 10000) / 10000;
+
+    console.log(`[place-order] deducting ${exactCharge} ${currencyLabel}, newBalance=${newBalance}`);
+
     await adminClient
       .from("profiles")
       .update({ wallet_balance: newBalance })
       .eq("user_id", user.id);
 
-    // Record transaction
+    // Record transaction with exact amount in user's currency
     await adminClient.from("transactions").insert({
       user_id: user.id,
-      amount: -usdCharge,
+      amount: -exactCharge,
       type: "order",
-      description: `Order: ${service.name} x${quantity} (${currencySymbol}${displayCharge.toFixed(2)})`,
+      description: `Order: ${service.name} x${quantity} (${currencySymbol}${exactCharge.toFixed(2)} ${currencyLabel})`,
     });
 
     // Try to place order with provider API if service has provider mapping
@@ -179,7 +158,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Create order record with exact charge amount
+    // Create order record with exact charge in user's currency
     const { data: order, error: orderError } = await adminClient
       .from("orders")
       .insert({
@@ -187,7 +166,7 @@ Deno.serve(async (req) => {
         service_id: public_service_id,
         link,
         quantity,
-        amount: usdCharge,
+        amount: exactCharge,
         status: providerOrderId ? "processing" : "pending",
         provider_order_id: providerOrderId,
       })
@@ -195,24 +174,33 @@ Deno.serve(async (req) => {
       .single();
 
     if (orderError) {
+      // Refund on order creation failure
+      console.error(`[place-order] order insert failed, refunding ${exactCharge} to user ${user.id}`);
+      await adminClient
+        .from("profiles")
+        .update({ wallet_balance: profile.wallet_balance })
+        .eq("user_id", user.id);
       return new Response(JSON.stringify({ error: orderError.message }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    console.log(`[place-order] success orderId=${order.id} charged=${exactCharge} ${currencyLabel} newBalance=${newBalance}`);
+
     return new Response(
       JSON.stringify({
         success: true,
         order_id: order.id,
         provider_order_id: providerOrderId,
-        charged: displayCharge,
+        charged: exactCharge,
         currency: currencyLabel,
         new_balance: newBalance,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
+    console.error("[place-order] unexpected error:", e);
     return new Response(
       JSON.stringify({ error: e.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
