@@ -40,7 +40,7 @@ export default function UserDashboard() {
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Wallet Balance" value={
           profile?.wallet_currency === "INR"
-            ? `₹${((profile?.wallet_balance ?? 0) * (marketRate || 93)).toFixed(2)}`
+            ? `₹${(profile?.wallet_balance ?? 0).toFixed(2)}`
             : profile?.wallet_currency === "USDT"
               ? `$${(profile?.wallet_balance ?? 0).toFixed(2)}`
               : formatWallet(profile?.wallet_balance ?? 0)
