@@ -87,7 +87,8 @@ export default function AdminUsers() {
               <div className="flex items-center justify-between p-2.5 rounded-lg bg-muted/30 mb-3">
                 <div className="flex items-center gap-1.5 text-xs">
                   <Wallet className="h-3.5 w-3.5 text-primary" />
-                  <span className="font-bold text-foreground">${u.wallet_balance.toFixed(2)}</span>
+                  <span className="font-bold text-foreground">{u.wallet_currency === "INR" ? "₹" : "$"}{u.wallet_balance.toFixed(2)}</span>
+                  {u.wallet_currency && <Badge variant="outline" className="text-[9px] px-1 py-0">{u.wallet_currency}</Badge>}
                 </div>
                 <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                   <Calendar className="h-3 w-3" />
@@ -111,9 +112,9 @@ export default function AdminUsers() {
       <Dialog open={adjustDialog} onOpenChange={setAdjustDialog}>
         <DialogContent>
           <DialogHeader><DialogTitle className="font-bold">Adjust Wallet — {selectedUser?.name || selectedUser?.email}</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Current balance: <span className="font-semibold text-foreground">${selectedUser?.wallet_balance.toFixed(2)}</span></p>
+          <p className="text-sm text-muted-foreground">Current balance: <span className="font-semibold text-foreground">{selectedUser?.wallet_currency === "INR" ? "₹" : "$"}{selectedUser?.wallet_balance.toFixed(2)}</span> <Badge variant="outline" className="text-[9px] px-1 py-0">{selectedUser?.wallet_currency || "Not set"}</Badge></p>
           <div className="space-y-4">
-            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount (use negative to deduct)</Label><Input type="number" step="0.01" value={adjustAmount} onChange={(e) => setAdjustAmount(Number(e.target.value))} className="h-11 rounded-lg" /></div>
+            <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount in {selectedUser?.wallet_currency || "USD"} (use negative to deduct)</Label><Input type="number" step="0.01" value={adjustAmount} onChange={(e) => setAdjustAmount(Number(e.target.value))} className="h-11 rounded-lg" /></div>
             <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reason</Label><Input value={adjustReason} onChange={(e) => setAdjustReason(e.target.value)} placeholder="Adjustment reason" className="h-11 rounded-lg" /></div>
             <Button onClick={handleAdjust} className="w-full font-semibold rounded-xl">Apply Adjustment</Button>
           </div>
