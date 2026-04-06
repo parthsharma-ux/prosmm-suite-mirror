@@ -8,7 +8,9 @@ import { User, Wallet, ShoppingCart, Calendar, ArrowDownCircle, ArrowUpCircle, H
 
 export default function UserAccount() {
   const { user, profile } = useAuth();
-  const { format, formatWallet } = useCurrency();
+  const walletCurrency = profile?.wallet_currency;
+  const currencySymbol = walletCurrency === "INR" ? "₹" : "$";
+  const formatNative = (amount: number, decimals = 2) => `${currencySymbol}${Math.abs(amount).toFixed(decimals)}`;
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["user-spending", user?.id],
