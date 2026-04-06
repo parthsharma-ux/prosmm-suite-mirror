@@ -11,7 +11,7 @@ export default function UserLayout() {
   const balance = profile?.wallet_balance ?? 0;
 
   const displayBalance = profile?.wallet_currency === "INR"
-    ? `₹${(balance * (marketRate || 93)).toFixed(2)}`
+    ? `₹${balance.toFixed(2)}`
     : profile?.wallet_currency === "USDT"
       ? `$${balance.toFixed(2)}`
       : formatWallet(balance);
