@@ -1,5 +1,4 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useCurrency } from "@/hooks/useCurrency";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,7 +7,9 @@ import { User, Wallet, ShoppingCart, Calendar, ArrowDownCircle, ArrowUpCircle, H
 
 export default function UserAccount() {
   const { user, profile } = useAuth();
-  const { format, formatWallet } = useCurrency();
+  const walletCurrency = profile?.wallet_currency;
+  const currencySymbol = walletCurrency === "INR" ? "₹" : "$";
+  const formatNative = (amount: number, decimals = 2) => `${currencySymbol}${Math.abs(amount).toFixed(decimals)}`;
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["user-spending", user?.id],
@@ -63,8 +64,8 @@ export default function UserAccount() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { icon: Wallet, label: "Wallet Balance", value: formatWallet(profile?.wallet_balance ?? 0), loading: false, color: "bg-primary/10 text-primary" },
-          { icon: ShoppingCart, label: "Total Spent", value: format(stats?.totalSpent ?? 0), loading: isLoading, color: "bg-warning/10 text-warning" },
+          { icon: Wallet, label: "Wallet Balance", value: formatNative(profile?.wallet_balance ?? 0), loading: false, color: "bg-primary/10 text-primary" },
+          { icon: ShoppingCart, label: "Total Spent", value: formatNative(stats?.totalSpent ?? 0), loading: isLoading, color: "bg-warning/10 text-warning" },
           { icon: Calendar, label: "Total Orders", value: String(stats?.totalOrders ?? 0), loading: isLoading, color: "bg-success/10 text-success" },
         ].map((item) => (
           <div key={item.label} className="ecom-card-interactive p-5 text-center">
@@ -116,7 +117,7 @@ export default function UserAccount() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className={`text-sm font-semibold ${isCredit ? "text-success" : "text-foreground"}`}>
-                      {isCredit ? "+" : "−"}{format(Math.abs(Number(tx.amount)))}
+                      {isCredit ? "+" : "−"}{formatNative(Math.abs(Number(tx.amount)))}
                     </p>
                     <p className="text-[10px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString()}</p>
                   </div>
