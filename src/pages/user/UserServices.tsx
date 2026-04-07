@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrency } from "@/hooks/useCurrency";
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,14 +17,16 @@ type Category = Tables<"categories">;
 
 export default function UserServices() {
   const { user, profile, refreshProfile } = useAuth();
+  const { currency } = useCurrency();
   const walletCurrency = profile?.wallet_currency; // "INR" | "USDT" | null
+  // Use wallet_currency if locked, otherwise use toggle currency
+  const activeCurrency = walletCurrency || currency;
 
   const getRate = (s: PublicService) => {
-    if (walletCurrency === "INR") return s.rate_inr;
-    if (walletCurrency === "USDT") return s.rate_usdt;
-    return s.rate;
+    if (activeCurrency === "INR") return s.rate_inr;
+    return s.rate_usdt || s.rate;
   };
-  const rateSymbol = walletCurrency === "INR" ? "₹" : "$";
+  const rateSymbol = activeCurrency === "INR" ? "₹" : "$";
   const formatRate = (v: number, decimals = 2) => `${rateSymbol}${v.toFixed(decimals)}`;
   const [services, setServices] = useState<PublicService[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
