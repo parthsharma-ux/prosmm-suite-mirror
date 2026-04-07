@@ -131,8 +131,9 @@ export default function AdminOrders() {
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
           {orders.map((o) => {
             const profile = profiles[o.user_id];
-            const balanceUSD = profile?.wallet_balance ?? 0;
-            const balanceINR = balanceUSD * marketRate;
+            const walletCurrency = profile?.wallet_currency === "INR" ? "INR" : "USDT";
+            const currencySymbol = walletCurrency === "INR" ? "₹" : "$";
+            const walletBalance = profile?.wallet_balance ?? 0;
             const cfg = statusConfig[o.status] || statusConfig.pending;
             return (
               <div key={o.id} className="ecom-card-interactive p-5">
@@ -146,11 +147,10 @@ export default function AdminOrders() {
                   </Badge>
                 </div>
 
-                {/* User info */}
                 <div className="flex items-center gap-2 mb-3 p-2.5 rounded-lg bg-muted/30">
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-foreground truncate">{profile?.email || "—"}</p>
-                    <p className="text-[10px] text-muted-foreground">${balanceUSD.toFixed(2)} / ₹{balanceINR.toFixed(2)}</p>
+                    <p className="text-[10px] text-muted-foreground">{currencySymbol}{walletBalance.toFixed(2)} {walletCurrency}</p>
                   </div>
                 </div>
 
@@ -166,7 +166,7 @@ export default function AdminOrders() {
                     </div>
                     <div className="flex items-center gap-1 text-xs">
                       <DollarSign className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-bold">{profile?.wallet_currency === "INR" ? "₹" : "$"}{o.amount}</span>
+                      <span className="font-bold">{currencySymbol}{Number(o.amount).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
