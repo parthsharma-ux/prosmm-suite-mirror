@@ -159,14 +159,14 @@ export default function AdminOrders() {
                     <ExternalLink className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
                     <p className="text-xs text-muted-foreground truncate flex-1">{o.link}</p>
                   </div>
-                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1 text-xs">
                       <Hash className="h-3 w-3 text-muted-foreground" />
                       <span className="font-semibold">{o.quantity}</span>
                     </div>
                     <div className="flex items-center gap-1 text-xs">
                       <DollarSign className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-bold">${o.amount}</span>
+                      <span className="font-bold">{profile?.wallet_currency === "INR" ? "₹" : "$"}{o.amount}</span>
                     </div>
                   </div>
                 </div>
