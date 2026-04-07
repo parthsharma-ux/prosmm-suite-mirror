@@ -100,15 +100,15 @@ export default function UserServices() {
   return (
     <div className="w-full max-w-3xl mx-auto animate-fade-in">
       <div className="page-header">
-        <h1 className="page-title">New Order</h1>
-        <p className="page-subtitle">Select a service and place your order</p>
+        <h1 className="page-title text-[1.75rem]">New Order</h1>
+        <p className="page-subtitle font-medium">Select a service and place your order</p>
       </div>
 
       <form onSubmit={handleOrder} className="space-y-5">
         {/* Category & Search */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="ecom-card p-5">
-            <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Category</Label>
+            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2.5 block">Category</Label>
             <Select value={selectedCategory || "__all__"} onValueChange={(v) => { setSelectedCategory(v === "__all__" ? "" : v); setSelectedService(""); }}>
               <SelectTrigger className="w-full h-11 rounded-lg">
                 <SelectValue placeholder="All Categories" />
@@ -121,7 +121,7 @@ export default function UserServices() {
           </div>
 
           <div className="ecom-card p-5">
-            <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Search</Label>
+            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2.5 block">Search</Label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -136,7 +136,7 @@ export default function UserServices() {
 
         {/* Service Selector */}
         <div className="ecom-card p-5">
-          <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
+          <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
             <Package className="h-3.5 w-3.5" /> Service
           </Label>
           <Select value={selectedService || "__none__"} onValueChange={(v) => { const id = v === "__none__" ? "" : v; setSelectedService(id); const s = services.find((x) => x.id === id); if (s) setQuantity(s.min_quantity); }}>
@@ -144,8 +144,8 @@ export default function UserServices() {
               <SelectValue placeholder="Select a service">
                 {service && (
                   <span className="truncate block text-left max-w-full">
-                    <span className="text-primary font-bold mr-1.5 text-xs">#{service.provider_service_id || "N/A"}</span>
-                    <span className="truncate text-sm">{service.name}</span>
+                    <span className="text-primary font-extrabold mr-1.5 text-xs">#{service.provider_service_id || "N/A"}</span>
+                    <span className="truncate text-sm font-semibold">{service.name}</span>
                   </span>
                 )}
               </SelectValue>
@@ -156,11 +156,11 @@ export default function UserServices() {
                 <SelectItem key={s.id} value={s.id} className="py-3 px-3">
                   <div className="w-full box-border overflow-hidden">
                     <div className="flex items-start gap-2 min-w-0">
-                      <span className="shrink-0 text-[11px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">#{s.provider_service_id || "N/A"}</span>
-                      <span className="text-sm font-medium break-words" style={{ overflowWrap: "anywhere", whiteSpace: "normal", lineHeight: "1.4" }}>{s.name}</span>
+                      <span className="shrink-0 text-[11px] font-extrabold text-primary bg-primary/10 px-1.5 py-0.5 rounded">#{s.provider_service_id || "N/A"}</span>
+                      <span className="text-sm font-semibold break-words" style={{ overflowWrap: "anywhere", whiteSpace: "normal", lineHeight: "1.4" }}>{s.name}</span>
                     </div>
                     <div className="flex items-center gap-3 text-[11px] text-muted-foreground mt-1.5 ml-0.5">
-                      <span className="font-semibold text-foreground">{formatRate(getRate(s), 2)}/1K</span>
+                      <span className="font-extrabold text-foreground">{formatRate(getRate(s), 2)}/1K</span>
                       <span className="text-muted-foreground">Min: {s.min_quantity}</span>
                       <span className="text-muted-foreground">Max: {s.max_quantity}</span>
                     </div>
@@ -181,14 +181,14 @@ export default function UserServices() {
               <div className="min-w-0 flex-1 space-y-2.5">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border-0">
+                    <Badge variant="secondary" className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-primary/10 text-primary border-0">
                       #{service.provider_service_id || "N/A"}
                     </Badge>
                     {getCategoryName(service.category_id) && (
                       <span className="text-[10px] text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded-md">{getCategoryName(service.category_id)}</span>
                     )}
                   </div>
-                  <p className="font-semibold text-sm text-foreground leading-snug" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{service.name}</p>
+                  <p className="font-bold text-sm text-foreground leading-snug" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{service.name}</p>
                 </div>
                 {service.description && (
                   <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap" style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>{service.description}</p>
@@ -196,7 +196,7 @@ export default function UserServices() {
                 <div className="flex items-center gap-4 pt-1">
                   <div className="flex items-center gap-1.5 text-xs">
                     <Zap className="h-3.5 w-3.5 text-primary" />
-                    <span className="font-bold text-foreground">{formatRate(getRate(service), 2)}/1K</span>
+                    <span className="font-extrabold text-foreground">{formatRate(getRate(service), 2)}/1K</span>
                   </div>
                   <div className="h-3.5 w-px bg-border" />
                   <span className="text-[11px] text-muted-foreground">Min: <span className="font-medium text-foreground">{service.min_quantity}</span></span>
@@ -209,7 +209,7 @@ export default function UserServices() {
 
         {/* Link Input */}
         <div className="ecom-card p-5">
-          <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
+          <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
             <LinkIcon className="h-3.5 w-3.5" /> Link / @Username
           </Label>
           <Input
@@ -226,7 +226,7 @@ export default function UserServices() {
         {/* Quantity & Charge */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="ecom-card p-5">
-            <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
+            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2.5 flex items-center gap-1.5">
               <Hash className="h-3.5 w-3.5" /> Quantity
             </Label>
             <Input
@@ -241,9 +241,9 @@ export default function UserServices() {
             />
           </div>
           <div className="ecom-card p-5">
-            <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2.5 block">Total Charge</Label>
+            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2.5 block">Total Charge</Label>
             <div className="flex items-center h-11 rounded-lg border border-border bg-muted/50 px-4">
-              <span className="text-base font-bold text-foreground">{formatRate(totalCharge, 4)}</span>
+              <span className="text-lg font-extrabold text-foreground">{formatRate(totalCharge, 4)}</span>
             </div>
           </div>
         </div>
@@ -251,7 +251,7 @@ export default function UserServices() {
         {/* Submit */}
         <Button
           type="submit"
-          className="w-full h-12 font-semibold text-sm rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
+          className="w-full h-12 font-bold text-sm rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
           disabled={submitting || !selectedService}
         >
           {submitting ? (
