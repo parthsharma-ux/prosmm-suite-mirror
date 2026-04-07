@@ -166,7 +166,7 @@ export default function AdminOrders() {
                     </div>
                     <div className="flex items-center gap-1 text-xs">
                       <DollarSign className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-bold">{profile?.wallet_currency === "INR" ? "₹" : "$"}{o.amount}</span>
+                      <span className="font-bold">{currencySymbol}{Number(o.amount).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
