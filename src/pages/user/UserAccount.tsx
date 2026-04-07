@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrency } from "@/hooks/useCurrency";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -7,8 +8,10 @@ import { User, Wallet, ShoppingCart, Calendar, ArrowDownCircle, ArrowUpCircle, H
 
 export default function UserAccount() {
   const { user, profile } = useAuth();
+  const { currency } = useCurrency();
   const walletCurrency = profile?.wallet_currency;
-  const currencySymbol = walletCurrency === "INR" ? "₹" : "$";
+  const activeCurrency = walletCurrency || currency;
+  const currencySymbol = activeCurrency === "INR" ? "₹" : "$";
   const formatNative = (amount: number, decimals = 2) => `${currencySymbol}${Math.abs(amount).toFixed(decimals)}`;
 
   const { data: stats, isLoading } = useQuery({
